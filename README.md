@@ -8,7 +8,7 @@
 
 ## 📜 Table of Contents
 
-1. [Challenge Overview](#challenge-overview)
+1. [Challenge Overview](##challenge-overview)
 2. [Problem Statement](#problem-statement)
 3. [Solution](#solution)
 4. [Features](#features)
@@ -78,8 +78,8 @@ FinEase is a comprehensive financial management platform that offers:
 - **🔒 PostgreSQL:** Advanced security features and data consistency.
 - **📝 TypeScript:** Provides better type safety as a superset of JavaScript.
 - **🐍 Python:** Primary language for TensorFlow and PyTorch.
-- **☁️ AWS:** Scalability with robust management tools.
-- **🔗 Embedchain RAG Framework & Mistral LLM Model:** Advanced text similarity and open-source model.
+- **☁️ Microsoft Azure:** Scalability with robust management tools.
+- **🔗 Embedchain RAG Framework & Microsoft Azure OpenAI:** Advanced text similarity and AI model integration.
 - **🌐 IndicTrans2 (AI4Bharat):** High-quality machine translation for 22 languages.
 - **🔥 PyTorch & Keras:** Flexibility, GPU acceleration, simplicity, and rapid prototyping.
 - **⚛️ React & Tailwind CSS:** Popular framework and styling for building user interfaces.
