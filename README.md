@@ -1,6 +1,10 @@
 <h1 align="center">FinEase: Your Automated Financial Planner 💰</h1>
 
 <p align="center">
+  <b>Powered by Microsoft Azure</b>
+</p>
+
+<p align="center">
   Welcome to <b>FinEase</b>, a revolutionary platform that harnesses the power of generative AI to provide personalized, data-driven financial advice. FinEase integrates all aspects of financial planning into one easy-to-use platform, helping users manage their finances with confidence and ease.
 </p>
 
