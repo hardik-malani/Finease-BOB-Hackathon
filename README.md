@@ -8,7 +8,7 @@
 
 ## 📜 Table of Contents
 
-1. [Challenge Overview](##challenge-overview)
+1. [Challenge Overview](#challenge-overview)
 2. [Problem Statement](#problem-statement)
 3. [Solution](#solution)
 4. [Features](#features)
