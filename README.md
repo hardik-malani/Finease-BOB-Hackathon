@@ -143,7 +143,7 @@ FinEase's architecture ensures seamless interaction between the frontend and bac
 
 - [🎨 Figma Designs](https://www.figma.com/proto/Bi2alauH31CGJ2bw8nGiSx/Untitled?type=design&node-id=190-22522&t=Pa16i9NyVi1lxtUg-1&scaling=contain&page-id=190%3A14410&starting-point-node-id=190%3A23402&show-proto-sidebar=1&mode=design)
 - [🔄 Workflow Diagram](https://drive.google.com/file/d/1bAD6rc1QsE-oMJjZec4JrPyLvC-Lqy3F/view?usp=sharing)
-- [🏗️ Architecture Diagram](https://drive.google.com/file/d/1ud8g_3PW8DuYoH4M9-Cekxln0bG2KBR5/view?usp=sharing)
+- [🏗️ Architecture Diagram](https://drive.google.com/file/d/197Ca-f68E-RnpzJLxKq718lpLxJmEqU6/view?usp=sharing)
 
 <p align="center">
   Thank you for exploring FinEase. Together, let's simplify financial planning and empower users to manage their finances confidently!
