@@ -93,8 +93,7 @@ FinEase is a comprehensive financial management platform that offers:
 ## 🏗️ Architecture
 
 <p align="center">
-  <img src="![Team - Finease - Page 1](https://github.com/hardik-malani/Finease-BOB-Hackathon/assets/82711261/fb39cbcb-4af7-47d2-af35-1efaaf33a5b3)
-" alt="Architecture Diagram">
+  ![Team - Finease - Page 1](https://github.com/hardik-malani/Finease-BOB-Hackathon/assets/82711261/fb39cbcb-4af7-47d2-af35-1efaaf33a5b3)
 </p>
 
 FinEase's architecture ensures seamless interaction between the frontend and backend components, including:
