@@ -1,7 +1,18 @@
-export default function App() {
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Dashboard from './pages/Dashboard.jsx';
+import './index.css';
+import Chatbot from './pages/Chatbot.jsx';
+
+const App = () => {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/chatbot" element={<Chatbot/>} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;

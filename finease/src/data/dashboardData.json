@@ -1,0 +1,58 @@
+{
+    "user": {
+      "name": "Hardik",
+      "balance": 3596,
+      "income": 421,
+      "expenses": 164,
+      "savings": 257
+    },
+    "finances": {
+      "dates": ["April 1", "April 2", "April 3", "April 4"],
+      "income": [100, 200, 300, 400],
+      "expenses": [50, 150, 250, 350]
+    },
+    "transactionHistory": [
+      {
+        "name": "Sandeep kumar",
+        "type": "Food",
+        "date": "March 29, 2022",
+        "amount": 45
+      },
+      {
+        "name": "HnM Store",
+        "type": "Shopping",
+        "date": "March 27, 2022",
+        "amount": -241
+      },
+      {
+        "name": "Rajesh Jewellers",
+        "type": "Others",
+        "date": "March 25, 2022",
+        "amount": 100
+      }
+    ],
+    "goals": [
+      {
+        "name": "Hero Honda Car",
+        "progress": 50
+      },
+      {
+        "name": "New Macbook 14\"",
+        "progress": 60
+      }
+    ],
+    "retirementTracking": {
+      "dates": ["2024", "2030", "2040", "2050", "2060", "2070"],
+      "savings": [50000, 70000, 100000, 130000, 160000, 200000]
+    },
+    "sustainabilityScore": {
+      "total": 200,
+      "max": 1000,
+      "details": {
+        "carbonFootprint": 35,
+        "energyConsumption": 20,
+        "ecoFriendlyLifestyle": 57
+      }
+    }
+  }
+  
