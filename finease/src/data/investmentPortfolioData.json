@@ -1,0 +1,36 @@
+{
+    "user": {
+      "name": "Hardik Malani",
+      "totalInvestment": 100000,
+      "totalReturn": 15000,
+      "returnPercentage": 15
+    },
+    "portfolioSummary": {
+      "labels": ["Stocks", "Bonds", "Real Estate", "Cryptocurrencies"],
+      "data": [50, 30, 15, 5]
+    },
+    "stockPerformance": {
+      "labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "datasets": [
+        {
+          "label": "Portfolio Value",
+          "data": [100000, 102000, 105000, 103000, 107000, 115000]
+        },
+        {
+          "label": "Benchmark Index",
+          "data": [100000, 101000, 103000, 102000, 104000, 106000]
+        }
+      ]
+    },
+    "recommendedStocks": [
+      { "name": "Tech Corp", "symbol": "TECH", "price": 150.25, "change": 2.5 },
+      { "name": "Green Energy", "symbol": "GRNE", "price": 75.80, "change": -1.2 },
+      { "name": "HealthCare Inc", "symbol": "HLTH", "price": 200.10, "change": 0.8 },
+      { "name": "Finance Group", "symbol": "FING", "price": 90.45, "change": 1.5 }
+    ],
+    "tradeHistory": [
+      { "stock": "Tech Corp", "action": "Buy", "quantity": 10, "price": 148.50, "date": "2024-06-15" },
+      { "stock": "Green Energy", "action": "Sell", "quantity": 5, "price": 76.20, "date": "2024-06-10" },
+      { "stock": "HealthCare Inc", "action": "Buy", "quantity": 8, "price": 195.75, "date": "2024-06-05" }
+    ]
+  }

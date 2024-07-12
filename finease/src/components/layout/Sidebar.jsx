@@ -25,7 +25,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <Link to="/document-dropbox" onClick={toggleSidebar} className="block flex items-center p-2 rounded-lg hover:bg-blue-700">
           <FaDropbox className="mr-2 lg:mr-3" /> Document DropBox
         </Link>
-        <Link to="/investment-portfolio" onClick={toggleSidebar} className="block flex items-center p-2 rounded-lg hover:bg-blue-700">
+        <Link to="/investment" onClick={toggleSidebar} className="block flex items-center p-2 rounded-lg hover:bg-blue-700">
           <FaChartLine className="mr-2 lg:mr-3" /> Investment Portfolio
         </Link>
         <Link to="/goal-setting" onClick={toggleSidebar} className="block flex items-center p-2 rounded-lg hover:bg-blue-700">
