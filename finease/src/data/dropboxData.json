@@ -1,0 +1,48 @@
+{
+  "files": [],
+  "bills": [
+      {
+          "companyName": "Viking Burrito",
+          "email": "oliver@burrito.com",
+          "vatNumber": "FRB1234576",
+          "amount": "₹1500",
+          "billType": "Electricity"
+      },
+      {
+          "companyName": "Viking Burrito",
+          "email": "oliver@burrito.com",
+          "vatNumber": "FRB1234576",
+          "amount": "₹2000",
+          "billType": "Water"
+      },
+      {
+          "companyName": "Viking Burrito",
+          "email": "oliver@burrito.com",
+          "vatNumber": "FRB1234576",
+          "amount": "₹2500",
+          "billType": "Internet"
+      }
+  ],
+  "documents": [
+      {
+          "name": "Bank Statement April 2024",
+          "type": "PDF"
+      },
+      {
+          "name": "Passbook Bank of India",
+          "type": "PDF"
+      },
+      {
+          "name": "Pan Card",
+          "type": "PDF"
+      },
+      {
+          "name": "Aadhar Card",
+          "type": "PDF"
+      },
+      {
+          "name": "Credit Card",
+          "type": "PDF"
+      }
+  ]
+}
