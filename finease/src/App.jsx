@@ -6,6 +6,7 @@ import Chatbot from './pages/Chatbot.jsx';
 import FinancialLiteracy from './pages/FinancialLiteracy.jsx';
 import DocumentDropbox from './pages/DocumentDropbox.jsx';
 import InvestmentPortfolio from './pages/InvestmentPortfolio.jsx';
+import BudgetTracking from './pages/BudgetTracking.jsx';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/financial-literacy" element={<FinancialLiteracy />} />
         <Route path="/document-dropbox" element={<DocumentDropbox/>} />
         <Route path="/investment" element={<InvestmentPortfolio/>} />
+        <Route path="/budget-tracking" element={<BudgetTracking/>} />
       </Routes>
     </Router>
   );

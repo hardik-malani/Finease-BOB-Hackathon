@@ -1,0 +1,45 @@
+{
+    "user": {
+      "name": "Hardik",
+      "profilePicture": "https://randomuser.me/api/portraits/men/61.jpg"
+    },
+    "financeSummary": {
+      "balance": 3596,
+      "income": 421,
+      "expenses": 164,
+      "savings": 257
+    },
+    "bills": [
+      { "id": 1, "name": "Electricity", "amount": 3984, "dueDate": "2024-05-15" },
+      { "id": 2, "name": "Rent", "amount": 25000, "dueDate": "2024-05-01" },
+      { "id": 3, "name": "Cable", "amount": 2325, "dueDate": "2024-05-20" },
+      { "id": 4, "name": "Gas", "amount": 4500, "dueDate": "2024-05-25" },
+      { "id": 5, "name": "Internet", "amount": 1500, "dueDate": "2024-05-10" },
+      { "id": 6, "name": "Phone", "amount": 999, "dueDate": "2024-05-18" }
+    ],
+    "budgetBreakdown": [
+      { "category": "Bills", "percentage": 27.3 },
+      { "category": "Food", "percentage": 27.3 },
+      { "category": "Groceries", "percentage": 18.2 },
+      { "category": "Entertainment", "percentage": 9.1 },
+      { "category": "Repairs", "percentage": 9.1 },
+      { "category": "Loan", "percentage": 9.1 }
+    ],
+    "transactionHistory": [
+      { "name": "Sandeep kumar", "type": "Food", "date": "2024-05-29", "amount": 45 },
+      { "name": "H&M Store", "type": "Shopping", "date": "2024-05-27", "amount": -241 },
+      { "name": "Rajesh Jewellers", "type": "Others", "date": "2024-05-25", "amount": 100 }
+    ],
+    "quickTransactionContacts": [
+      { "name": "Neha", "avatar": "https://randomuser.me/api/portraits/women/62.jpg" },
+      { "name": "Rahuk", "avatar": "https://randomuser.me/api/portraits/men/63.jpg" },
+      { "name": "Kunisha", "avatar": "https://randomuser.me/api/portraits/women/64.jpg" },
+      { "name": "Ahmed", "avatar": "https://randomuser.me/api/portraits/men/65.jpg" }
+    ],
+    "cardDetails": {
+      "number": "5995747411037513",
+      "name": "Hardik Malani",
+      "expiry": "11/24",
+      "cvc": "123"
+    }
+  }
