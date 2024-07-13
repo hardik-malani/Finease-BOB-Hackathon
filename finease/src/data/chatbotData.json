@@ -1,0 +1,73 @@
+{
+    "user": {
+      "name": "Hardik Malani",
+      "avatar": "https://randomuser.me/api/portraits/men/61.jpg"
+    },
+    "messages": [
+      {
+        "id": 1,
+        "sender": "user",
+        "content": "Hello Neymo,how are you today?"
+      },
+      {
+        "id": 2,
+        "sender": "bot",
+        "content": "Hello,i'm fine,how can i help you?"
+      },
+      {
+        "id": 3,
+        "sender": "user",
+        "content": "What is the NFT? Explain"
+      },
+      {
+        "id": 4,
+        "sender": "bot",
+        "content": "NFT stands for non-fungible token. It's essentially a digital certificate of ownership for a unique digital asset. Think of it like a one-of-a-kind trading card, but instead of being a physical card it's a digital file."
+      },
+      {
+        "id": 5,
+        "sender": "user",
+        "content": "So explain to me more"
+      },
+      {
+        "id": 6,
+        "sender": "user",
+        "content": "So explain to me more"
+      },
+      {
+          "id": 7,
+          "sender": "bot",
+        "content": "Absolutely! Here's another tip:When buying NFTs, prioritize platforms with strong security measures and transparent transaction histories to safeguard your investments against fraud and ensure authenticity."
+    }
+],
+    "recentChats": [
+      {
+        "id": 1,
+        "title": "Saving tips",
+        "description": "Tips for saving",
+        "category": "Saving tips",
+        "date": "2023-7-15 22:00"
+      },
+      {
+        "id": 2,
+        "title": "Stock news",
+        "description": "Latest stock market updates",
+        "category": "Finance news",
+        "date": "2023-7-14 15:30"
+      },
+      {
+        "id": 3,
+        "title": "Calculate expenses",
+        "description": "How to track your expenses",
+        "category": "Budget Track",
+        "date": "2023-7-13 10:45"
+      },
+      {
+        "id": 4,
+        "title": "Stock news",
+        "description": "Current stock trends",
+        "category": "Finance news",
+        "date": "2023-7-12 09:15"
+      }
+    ]
+  }

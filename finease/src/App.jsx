@@ -7,6 +7,9 @@ import FinancialLiteracy from './pages/FinancialLiteracy.jsx';
 import DocumentDropbox from './pages/DocumentDropbox.jsx';
 import InvestmentPortfolio from './pages/InvestmentPortfolio.jsx';
 import BudgetTracking from './pages/BudgetTracking.jsx';
+import GoalSetting from './pages/GoalSetting.jsx';
+import Retirement from './pages/Retirement.jsx';
+import Profile from './pages/ProfileSettings.jsx';
 
 const App = () => {
   return (
@@ -21,6 +24,9 @@ const App = () => {
         <Route path="/document-dropbox" element={<DocumentDropbox/>} />
         <Route path="/investment" element={<InvestmentPortfolio/>} />
         <Route path="/budget-tracking" element={<BudgetTracking/>} />
+        <Route path="/goal-setting" element={<GoalSetting/>} />
+        <Route path="/retirement" element={<Retirement/>} />
+        <Route path="/profile-settings" element={<Profile/>} />
       </Routes>
     </Router>
   );

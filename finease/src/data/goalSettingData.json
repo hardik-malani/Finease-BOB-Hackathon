@@ -1,0 +1,36 @@
+{
+    "user": {
+      "name": "Hardik",
+      "avatar": "/images/avatar.jpg"
+    },
+    "goals": [
+      {
+        "id": 1,
+        "title": "Hero Honda Car",
+        "targetAmount": 500000,
+        "currentAmount": 272000,
+        "weeklyTarget": 228,
+        "progress": 54
+      },
+      {
+        "id": 2,
+        "title": "New Macbook 14\"",
+        "targetAmount": 200000,
+        "currentAmount": 120000,
+        "weeklyTarget": 167,
+        "progress": 60
+      },
+      {
+        "id": 3,
+        "title": "Europe Vacation",
+        "targetAmount": 300000,
+        "currentAmount": 90000,
+        "weeklyTarget": 438,
+        "progress": 30
+      }
+    ],
+    "successRate": {
+      "successful": 4,
+      "unsuccessful": 1
+    }
+  }

@@ -1,0 +1,27 @@
+{
+    "user": {
+      "name": "Hardik Malani",
+      "email": "esthera@simmpple.com",
+      "location": "United States",
+      "mobile": "(44) 123 1234 123",
+      "bio": "Hi, I'm Hardik. Decisions: If you can't decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality).",
+      "socialMedia": {
+        "facebook": "https://facebook.com",
+        "twitter": "https://twitter.com",
+        "instagram": "https://instagram.com"
+      }
+    },
+    "settings": {
+      "account": {
+        "followEmail": true,
+        "answerEmail": false,
+        "mentionEmail": true
+      },
+      "application": {
+        "newLaunches": false,
+        "monthlyUpdates": false,
+        "newsletter": true
+      }
+    }
+  }
+  
