@@ -19,6 +19,9 @@ const Retirement = () => {
   if (!retirementData) return <div>Loading...</div>;
 
   const { user, retirementTracking } = retirementData;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+
 
   const retirementChartData = {
     labels: retirementTracking.dates,
@@ -50,7 +53,7 @@ const Retirement = () => {
       {/* Main Content */}
       <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         {/* Header */}
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Retirement Chart */}
         <div className="mb-6">

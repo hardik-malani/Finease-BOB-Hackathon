@@ -19,6 +19,10 @@ const InvestmentPortfolio = () => {
   if (!portfolioData) return <div>Loading...</div>;
 
   const { user, stockPerformance, recommendedStocks, tradeHistory, portfolioSummary } = portfolioData;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+  
+
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
@@ -29,7 +33,7 @@ const InvestmentPortfolio = () => {
       <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         {/* Header */}
         {/* <div className="flex items-center justify-between mb-4"> */}
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         {/* </div> */}
 
         {/* Portfolio Summary */}

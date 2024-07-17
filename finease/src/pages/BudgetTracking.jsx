@@ -23,13 +23,16 @@ const BudgetTracking = () => {
 
   if (!budgetData) return <div>Loading...</div>;
 
-  const { user, financeSummary, bills, budgetBreakdown, transactionHistory, quickTransactionContacts, cardDetails } = budgetData;
+  const { financeSummary, bills, budgetBreakdown, transactionHistory, quickTransactionContacts, cardDetails } = budgetData;
+
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
           <div className="container mx-auto px-6 py-8"> 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

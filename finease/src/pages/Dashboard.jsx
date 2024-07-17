@@ -26,6 +26,10 @@ const Dashboard = () => {
 
   const { user, finances, transactionHistory, goals, retirementTracking, sustainabilityScore } = dashboardData;
 
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+
+
   const financeChartData = {
     labels: finances.dates,
     datasets: [
@@ -89,7 +93,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         {/* Header */}
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         {/* Finance Summary */}
         <FinanceSummary user={user} />

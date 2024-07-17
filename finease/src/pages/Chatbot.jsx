@@ -17,6 +17,9 @@ const Chatbot = () => {
   if (!data) return <div>Loading...</div>;
 
   const { user, messages, recentChats } = data;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -32,7 +35,7 @@ const Chatbot = () => {
               >
                 <FaBars />
               </button>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Hey {user.name}!</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Hey {userName}!</h1>
             </div>
             <div className="flex items-center">
               <div className="mr-4 hidden sm:block">
@@ -48,13 +51,13 @@ const Chatbot = () => {
               >
                 <FaBell />
               </button>
-              <img className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" src={user.avatar} alt={user.name} />
+              <img className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" src={user.avatar} alt={userName} />
             </div>
           </div>
         </header>
 
         <main className="flex-1 flex overflow-hidden">
-          <ChatInterface messages={messages} user={user} />
+          <ChatInterface messages={messages} user={userName} />
           <RecentChats recentChats={recentChats} isOpen={isRecentChatsOpen} onClose={() => setIsRecentChatsOpen(false)} />
         </main>
       </div>

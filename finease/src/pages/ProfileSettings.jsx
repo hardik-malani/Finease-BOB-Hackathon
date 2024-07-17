@@ -18,6 +18,9 @@ const Profile = () => {
   if (!profileData) return <div>Loading...</div>;
 
   const { user, settings } = profileData;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -28,7 +31,7 @@ const Profile = () => {
       <div className="flex-1 flex flex-col overflow-y-auto ">
         {/* Header */}
         <div className='ml-2'>
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         </div>
 
         {/* Content */}

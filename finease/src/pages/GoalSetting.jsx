@@ -18,6 +18,9 @@ const GoalSetting = () => {
   if (!data) return <div>Loading...</div>;
 
   const { user, goals, successRate } = data;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
+
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
@@ -25,7 +28,7 @@ const GoalSetting = () => {
 
       <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
         <div className=' lg:hidden'>
-        <Header user={user} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <Header userName={userName} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
         </div>
 
         <div className="mb-6">

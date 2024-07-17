@@ -10,6 +10,9 @@ import BudgetTracking from './pages/BudgetTracking.jsx';
 import GoalSetting from './pages/GoalSetting.jsx';
 import Retirement from './pages/Retirement.jsx';
 import Profile from './pages/ProfileSettings.jsx';
+import LandingPage from './pages/LandingPage.jsx';
+import SignUp from './pages/SignUp.jsx';
+import Login from './pages/Login.jsx';
 
 const App = () => {
   return (
@@ -18,6 +21,9 @@ const App = () => {
       <div className='fixed right-10 bottom-10 size-12 md:size-16'><img src={"/chatbot.png"} alt="chatbot-logo" /></div>
       </Link>
       <Routes>
+        <Route path="/" element={<LandingPage/>} />
+        <Route path="/signup" element={<SignUp/>} />
+        <Route path="/sign-in" element={<Login/>} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chatbot" element={<Chatbot/>} />
         <Route path="/financial-literacy" element={<FinancialLiteracy />} />
