@@ -10,7 +10,7 @@ const LandingPage = () => {
           {/* <a href="dashboard" className="hover:text-blue-200">DASHBOARD</a>
           <a href="profile" className="hover:text-blue-200">PROFILE</a> */}
           <a href="signup" className="hover:text-blue-200 font-semibold">SIGN UP</a>
-          <a href="signin" className="hover:text-blue-200 font-semibold">SIGN IN</a>
+          <a href="sign-in" className="hover:text-blue-200 font-semibold">SIGN IN</a>
         <button className="bg-white text-blue-600 px-4 py-2 rounded-full font-semibold hover:bg-blue-100 transition duration-300">
           Free Download
         </button>
