@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement } from 'chart.js';
+import axios from 'axios';
 import data from '../data/dashboardData.json';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
@@ -16,19 +17,36 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
+  const [userName, setUserName] = useState('Default Name');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setDashboardData(data);
   }, []);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('http://localhost:5000/api/user', config);
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   if (!dashboardData) return <div>Loading...</div>;
 
   const { user, finances, transactionHistory, goals, retirementTracking, sustainabilityScore } = dashboardData;
-
-  const storedUserName = localStorage.getItem('userName');
-  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
-
 
   const financeChartData = {
     labels: finances.dates,
