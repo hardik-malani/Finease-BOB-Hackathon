@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -8,16 +9,23 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    localStorage.setItem('userName', JSON.stringify(name));
-    console.log('Sign up with:', { name, email, password });
 
-    setTimeout(() => {
+    const userData = { name, email, password };
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/signup', userData);
+
+      console.log('Sign up successful:', response.data);
+
       setIsLoading(false);
-      navigate('/dashboard');
-    }, 3000); // Simulate 3 sec loading effect
+      navigate('/sign-in');
+    } catch (error) {
+      console.error('Sign up failed:', error);
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {

@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    localStorage.setItem('userName', JSON.stringify(name));
-    console.log('Sign up with:', { name, password });
-    navigate('/dashboard');
+
+    const userData = { name, password };
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/login', userData);
+
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userName', JSON.stringify(name));
+
+      console.log('Login successful:', response.data);
+
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (
@@ -40,7 +53,7 @@ const Login = () => {
       <main className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md z-10 sm:mt-16">
         <h1 className="text-3xl font-bold text-center mb-6">Welcome!</h1>
         <p className="text-center text-gray-600 mb-8">
-          Login in your account!
+          Login to your account!
         </p>
 
         <form onSubmit={handleLogin}>
