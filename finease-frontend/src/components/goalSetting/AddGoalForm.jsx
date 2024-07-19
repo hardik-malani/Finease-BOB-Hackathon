@@ -1,16 +1,28 @@
-
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const AddGoalForm = () => {
+const AddGoalForm = ({ onGoalAdded }) => {
   const [goalTitle, setGoalTitle] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to handle form submission
-    console.log('New goal:', { goalTitle, targetAmount });
-    setGoalTitle('');
-    setTargetAmount('');
+    const newGoal = {
+      title: goalTitle,
+      targetAmount,
+      currentAmount: 0, // Default value
+      weeklyTarget: 0,  // Default value
+      progress: 0       // Default value
+    };
+
+    try {
+      const response = await axios.post('http://localhost:5000/goals', newGoal);
+      onGoalAdded(response.data);
+      setGoalTitle('');
+      setTargetAmount('');
+    } catch (error) {
+      console.error('Error adding goal:', error);
+    }
   };
 
   return (
