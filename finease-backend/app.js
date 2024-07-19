@@ -76,7 +76,7 @@ app.post('/api/login', async (req, res) => {
 
     jwt.sign(
       payload,
-      process.env.JWT_SECRET, 
+      'THISISNOTTHESECRET', 
       { expiresIn: '1h' },
       (err, token) => {
         if (err) throw err;
@@ -89,7 +89,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// User route
 app.get('/api/user', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -100,6 +99,35 @@ app.get('/api/user', authMiddleware, async (req, res) => {
   }
 });
 
+const goalSchema = new mongoose.Schema({
+  title: String,
+  targetAmount: Number,
+  currentAmount: { type: Number, default: 0 },
+  weeklyTarget: { type: Number, default: 0 },
+  progress: { type: Number, default: 0 },
+});
+
+const Goal = mongoose.model('Goal', goalSchema);
+
+app.post('/goals', async (req, res) => {
+  const { title, targetAmount } = req.body;
+  const newGoal = new Goal({ title, targetAmount });
+  try {
+    await newGoal.save();
+    res.status(201).json(newGoal);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/goals', async (req, res) => {
+  try {
+    const goals = await Goal.find();
+    res.json(goals);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
