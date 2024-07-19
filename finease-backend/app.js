@@ -8,6 +8,9 @@ const authMiddleware = require('./middlewares/authMiddleware');
 const app = express();
 const port = 5000;
 
+require('dotenv').config();
+
+
 app.use(bodyParser.json());
 app.use(cors());
 

@@ -17,7 +17,6 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
-  const [userName, setUserName] = useState('Default Name');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -47,6 +46,8 @@ const Dashboard = () => {
   if (!dashboardData) return <div>Loading...</div>;
 
   const { user, finances, transactionHistory, goals, retirementTracking, sustainabilityScore } = dashboardData;
+  const storedUserName = localStorage.getItem('userName');
+  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
 
   const financeChartData = {
     labels: finances.dates,
