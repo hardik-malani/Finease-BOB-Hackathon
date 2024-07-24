@@ -16,7 +16,7 @@ const SignUp = () => {
     const userData = { name, email, password };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/signup', userData);
+      const response = await axios.post('https://finease-bob-hackathon.onrender.com/api/signup', userData);
 
       console.log('Sign up successful:', response.data);
 

@@ -13,7 +13,7 @@ const Login = () => {
     const userData = { name, password };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/login', userData);
+      const response = await axios.post('https://finease-bob-hackathon.onrender.com/api/login', userData);
 
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userName', JSON.stringify(name));
