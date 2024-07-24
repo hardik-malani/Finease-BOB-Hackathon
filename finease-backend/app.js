@@ -6,7 +6,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./middlewares/authMiddleware');
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 require('dotenv').config();
 
