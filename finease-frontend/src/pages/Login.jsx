@@ -43,7 +43,7 @@ const Login = () => {
         </svg>
       </div>
 
-      <header className="w-full max-w-4xl flex justify-center items-center mb-8 z-10 px-4 md:px-0 space-x-[10%] md:justify-between md:-mt-24">
+      <header className="w-full max-w-4xl flex justify-center items-center mb-8 z-10 px-4 md:px-0 space-x-[10%] md:justify-between md:-mt-12">
         <Link to="/" className="text-white">
           <img src="/full-logo.png" alt="Finease" className="h-10" />
         </Link>
