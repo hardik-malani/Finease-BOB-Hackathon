@@ -16,7 +16,7 @@ const AddGoalForm = ({ onGoalAdded }) => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/goals', newGoal);
+      const response = await axios.post('https://finease-bob-hackathon.onrender.com/goals', newGoal);
       onGoalAdded(response.data);
       setGoalTitle('');
       setTargetAmount('');
