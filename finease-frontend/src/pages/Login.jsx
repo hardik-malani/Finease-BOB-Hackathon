@@ -5,6 +5,7 @@ import axios from 'axios';
 const Login = () => {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // State for error message
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -23,6 +24,7 @@ const Login = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
+      setError('Login failed. Please check your credentials and try again.'); // Set error message
     }
   };
 
@@ -88,6 +90,12 @@ const Login = () => {
             LOGIN
           </button>
         </form>
+
+        {/* Conditionally render the error message */}
+        {error && (
+          <p className="text-red-600 text-center mt-4">{error}</p>
+        )}
+        
         <p className="text-center mt-6 text-gray-600">
           Don't have an account? <Link to="/signup" className="text-blue-600 font-semibold">Sign Up</Link>
         </p>
