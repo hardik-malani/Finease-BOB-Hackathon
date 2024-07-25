@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilePdf } from '@fortawesome/free-solid-svg-icons';
 
-const DocumentsList = ({ documents }) => {
+const DocumentsList = () => {
+  const [documents, setDocuments] = useState([]);
+
+  useEffect(() => {
+    fetchUploadedFiles();
+  }, []);
+
+  const fetchUploadedFiles = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/get_uploaded_files');
+      setDocuments(response.data.map(filename => ({
+        name: filename,
+        type: filename.endsWith('.pdf') ? 'PDF' : 'Unknown'
+      })));
+    } catch (error) {
+      console.error('Error fetching uploaded files:', error);
+    }
+  };
+
   return (
     <div className="w-full md:w-1/2 lg:w-1/3 p-4">
       <h2 className="text-lg font-semibold mb-4">Your Documents</h2>

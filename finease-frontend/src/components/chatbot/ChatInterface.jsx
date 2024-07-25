@@ -1,27 +1,187 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaMicrophone, FaPaperPlane } from 'react-icons/fa';
+import { FaMicrophone, FaPaperPlane, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import axios from 'axios';
 
-const ChatInterface = ({ messages, user }) => {
+const ChatInterface = () => {
+  const initialMessages = [
+    {
+      id: 0,
+      sender: 'assistant',
+      content: 'Hello! How can I assist you today?',
+      isSpeaking: false
+    }
+  ];
+
   const [input, setInput] = useState('');
+  const [messages, setMessages] = useState(initialMessages);
+  const [selectedLanguage, setSelectedLanguage] = useState('en-US');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentUtterance, setCurrentUtterance] = useState(null); // State to track current utterance
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(scrollToBottom, [messages]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add logic to send message
-    console.log('Sending message:', input);
+
+    if (input.trim().toLowerCase() === 'quit' || input.trim().toLowerCase() === 'exit') {
+      setMessages([...messages, { id: messages.length, sender: 'user', content: input }, { id: messages.length + 1, sender: 'assistant', content: 'Session ended.' }]);
+      setInput('');
+      return;
+    }
+
+    const userMessage = { id: messages.length, sender: 'user', content: input };
+    setMessages([...messages, userMessage]);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/chatbot', { query: input, messages, language: selectedLanguage });
+      const botResponse = response.data.response;
+      const assistantMessage = { id: messages.length + 1, sender: 'assistant', content: botResponse, isSpeaking: false };
+
+      setMessages([...messages, userMessage, assistantMessage]);
+
+      // Stop any ongoing speech synthesis
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+
+      // Prepare and start text-to-speech
+      const utterance = new SpeechSynthesisUtterance(botResponse);
+      setCurrentUtterance(utterance); // Set the reference
+
+      if (selectedLanguage !== 'en-US') {
+        switch (selectedLanguage) {
+          case 'guj_Gujr':
+            utterance.lang = 'gu-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'gu-IN');
+            break;
+          case 'hin_Deva':
+            utterance.lang = 'hi-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'hi-IN');
+            break;
+          case 'kan_Knda':
+            utterance.lang = 'kn-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'kn-IN');
+            break;
+          case 'gom_Deva':
+            utterance.lang = 'kok-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'kok-IN');
+            break;
+          case 'mar_Deva':
+            utterance.lang = 'mr-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'mr-IN');
+            break;
+          case 'pan_Guru':
+            utterance.lang = 'pa-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'pa-IN');
+            break;
+          case 'tam_Taml':
+            utterance.lang = 'ta-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'ta-IN');
+            break;
+          case 'tel_Telu':
+            utterance.lang = 'te-IN';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'te-IN');
+            break;
+          default:
+            utterance.lang = 'en-US';
+            utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'en-US');
+            break;
+        }
+      } else {
+        utterance.lang = 'en-US';
+        utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === 'en-US');
+      }
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+
+      speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = { id: messages.length + 1, sender: 'assistant', content: 'Sorry, something went wrong.' };
+      setMessages([...messages, userMessage, errorMessage]);
+    }
+
     setInput('');
+  };
+
+  const handleSpeechToText = async () => {
+    try {
+      const recognition = new window.webkitSpeechRecognition();
+      let langCode = 'en-US'; // Default language code
+
+      switch (selectedLanguage) {
+        case 'guj_Gujr':
+          langCode = 'gu-IN';
+          break;
+        case 'hin_Deva':
+          langCode = 'hi-IN';
+          break;
+        case 'kan_Knda':
+          langCode = 'kn-IN';
+          break;
+        case 'gom_Deva':
+          langCode = 'kok-IN';
+          break;
+        case 'mar_Deva':
+          langCode = 'mr-IN';
+          break;
+        case 'pan_Guru':
+          langCode = 'pa-IN';
+          break;
+        case 'tam_Taml':
+          langCode = 'ta-IN';
+          break;
+        case 'tel_Telu':
+          langCode = 'te-IN';
+          break;
+        default:
+          langCode = 'en-US';
+          break;
+      }
+
+      recognition.lang = langCode;
+
+      recognition.onresult = (event) => {
+        const speechToTextResult = event.results[0][0].transcript;
+        setInput(speechToTextResult);
+      };
+
+      recognition.start();
+    } catch (error) {
+      console.error('Error converting speech to text:', error);
+    }
+  };
+
+  const handleStopSpeech = () => {
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
+  const handlePlayResponse = (response) => {
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    const utterance = new SpeechSynthesisUtterance(response);
+    setCurrentUtterance(utterance); // Set the reference
+    utterance.lang = selectedLanguage !== 'en-US' ? selectedLanguage : 'en-US';
+    utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === utterance.lang);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    speechSynthesis.speak(utterance);
   };
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {Array.isArray(messages) && messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -32,24 +192,62 @@ const ChatInterface = ({ messages, user }) => {
               }`}
             >
               {message.content}
+              {message.sender === 'assistant' && (
+                <button
+                  type="button"
+                  className="ml-2 text-gray-400 hover:text-gray-600"
+                  onClick={() => handlePlayResponse(message.content)}
+                >
+                  {isSpeaking ? <FaVolumeMute /> : <FaVolumeUp />}
+                </button>
+              )}
             </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="bg-white px-4 py-2 flex items-center">
+        <select
+          value={selectedLanguage}
+          onChange={(e) => setSelectedLanguage(e.target.value)}
+          className="mr-2 border p-1 rounded"
+        >
+          <option value="en-US">English</option>
+          <option value="guj_Gujr">Gujarati</option>
+          <option value="hin_Deva">Hindi</option>
+          <option value="kan_Knda">Kannada</option>
+          <option value="gom_Deva">Konkani</option>
+          <option value="mar_Deva">Marathi</option>
+          <option value="pan_Guru">Punjabi</option>
+          <option value="tam_Taml">Tamil</option>
+          <option value="tel_Telu">Telugu</option>
+        </select>
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Write your message"
-          className="flex-1 border-0 focus:ring-0 focus:outline-none"
+          className="flex-1 border p-2 rounded"
+          placeholder="Type your message here..."
         />
-        <button type="button" className="p-2 rounded-full text-gray-400 hover:text-gray-600">
+        <button
+          type="button"
+          onClick={handleSpeechToText}
+          className="ml-2 text-gray-500 hover:text-gray-700"
+        >
           <FaMicrophone />
         </button>
-        <button type="submit" className="p-2 rounded-full text-blue-500 hover:text-blue-600">
+        <button
+          type="submit"
+          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+        >
           <FaPaperPlane />
+        </button>
+        <button
+          type="button"
+          onClick={handleStopSpeech}
+          className="ml-2 text-red-500 hover:text-red-700"
+        >
+          Stop
         </button>
       </form>
     </div>
