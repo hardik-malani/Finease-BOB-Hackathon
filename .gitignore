@@ -1,2 +1,5 @@
-finease-models\Bank_Statement_June2024.pdf
-finease-models\Bank_Statement_ansh.pdf
+
+finease-models/Bank_Statement_June2024.pdf
+finease-models/Bank_Statement_ansh.pdf
+
+finease-models/*.pdf
