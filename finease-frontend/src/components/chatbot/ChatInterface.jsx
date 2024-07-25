@@ -16,7 +16,7 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState(initialMessages);
   const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [currentUtterance, setCurrentUtterance] = useState(null); // State to track current utterance
+  const [currentUtterance, setCurrentUtterance] = useState(null); 
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -44,14 +44,14 @@ const ChatInterface = () => {
 
       setMessages([...messages, userMessage, assistantMessage]);
 
-      // Stop any ongoing speech synthesis
+
       if (speechSynthesis.speaking) {
         speechSynthesis.cancel();
       }
 
-      // Prepare and start text-to-speech
+ 
       const utterance = new SpeechSynthesisUtterance(botResponse);
-      setCurrentUtterance(utterance); // Set the reference
+      setCurrentUtterance(utterance);
 
       if (selectedLanguage !== 'en-US') {
         switch (selectedLanguage) {
@@ -113,7 +113,7 @@ const ChatInterface = () => {
   const handleSpeechToText = async () => {
     try {
       const recognition = new window.webkitSpeechRecognition();
-      let langCode = 'en-US'; // Default language code
+      let langCode = 'en-US'; 
 
       switch (selectedLanguage) {
         case 'guj_Gujr':
@@ -170,7 +170,7 @@ const ChatInterface = () => {
       speechSynthesis.cancel();
     }
     const utterance = new SpeechSynthesisUtterance(response);
-    setCurrentUtterance(utterance); // Set the reference
+    setCurrentUtterance(utterance); 
     utterance.lang = selectedLanguage !== 'en-US' ? selectedLanguage : 'en-US';
     utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === utterance.lang);
     utterance.onstart = () => setIsSpeaking(true);

@@ -9,12 +9,11 @@ const SustainabilityScore = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch sustainability score and reasoning
+
         const response = await axios.get('http://127.0.0.1:5000/sustainable_transactions');
         setScore(response.data.score);
         setReasoning(response.data.reasoning);
 
-        // Fetch chart image URL
         const chartResponse = await axios.get('http://127.0.0.1:5000/calculate_percentages');
         setChartUrl(chartResponse.data.chart_url);
       } catch (error) {

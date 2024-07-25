@@ -9,6 +9,7 @@ import io
 from collections import Counter
 import os
 from flask import Flask, send_from_directory, jsonify
+import re
 
 
 app = Flask(__name__)
@@ -35,7 +36,7 @@ def extract_text_from_pdf(pdf_path):
 # parse transactions
 def parse_transactions(text):
     lines = text.split('\n')
-    return [line for line in lines if any(keyword in line for keyword in ['UPI', 'POS', 'IMPS', 'NEFT', 'RTGS'])]
+    return [line for line in lines if any(keyword in line for keyword in ['UPI/', 'POS/', 'IMPS/', 'NEFT/', 'RTGS/'])]
 
 # Upload PDF and extract transactions
 @app.route('/upload_pdf', methods=['POST'])
@@ -70,13 +71,40 @@ def upload_pdf():
 @app.route('/get_transactions', methods=['GET'])
 def get_transactions():
     global transactions
-    print("First 5 transactions:", transactions[:5])
-    return jsonify(transactions[:5]), 200
+    print("First 10 transactions:", transactions[:10])
+    return jsonify(transactions[:10]), 200
 
 # Files uploaded
 @app.route('/get_uploaded_files', methods=['GET'])
 def get_uploaded_files():
     return jsonify(uploaded_files), 200
+
+def get_income_expenses():
+    income = []
+    expenses = []
+    whitespace_pattern = re.compile(r'\s+')
+
+    for transaction in transactions:
+        parts = whitespace_pattern.split(transaction)
+        amount = (parts[-2].replace(',', ''))
+        print(amount)
+        if amount[0] == "-":
+            expenses.append(float(amount[1:]))
+        else:
+            income.append(float(amount[1:]))
+
+    return {'income': income, 'expenses': expenses}
+
+# Finance - expense and income
+@app.route('/get_income_expenses', methods=['GET'])
+def income_expenses():
+    try:
+        result = get_income_expenses()
+        return jsonify(result), 200
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": "An error occurred while processing transactions"}), 500
+
 
 # Model 1: Sustainable transactions
 @app.route('/sustainable_transactions', methods=['GET'])
