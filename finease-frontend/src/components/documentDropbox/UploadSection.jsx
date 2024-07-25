@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 
+const API_URL = 'https://finease-backend.azurewebsites.net';
+
 const UploadSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -43,7 +45,7 @@ const UploadSection = () => {
     files.forEach((file) => formData.append('files', file));
 
     try {
-      const response = await axios.post('http://localhost:5000/upload_pdf', formData, {
+      const response = await axios.post(`${API_URL}/upload_pdf`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

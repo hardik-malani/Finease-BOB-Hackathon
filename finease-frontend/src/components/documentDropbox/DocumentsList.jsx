@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilePdf } from '@fortawesome/free-solid-svg-icons';
 
+const API_URL = 'https://finease-backend.azurewebsites.net';
 const DocumentsList = () => {
   const [documents, setDocuments] = useState([]);
 
@@ -12,7 +13,7 @@ const DocumentsList = () => {
 
   const fetchUploadedFiles = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/get_uploaded_files');
+      const response = await axios.get(`${API_URL}/get_uploaded_files`);
       setDocuments(response.data.map(filename => ({
         name: filename,
         type: filename.endsWith('.pdf') ? 'PDF' : 'Unknown'

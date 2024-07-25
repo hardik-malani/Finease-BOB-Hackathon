@@ -4,6 +4,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+
+const API_URL = 'https://finease-backend.azurewebsites.net';
 const FinanceChart = ({ title }) => {
   const [chartData, setChartData] = useState({
     labels: [], // Dates or other categories
@@ -27,7 +29,7 @@ const FinanceChart = ({ title }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/get_income_expenses');
+        const response = await fetch(`${API_URL}/get_income_expenses`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

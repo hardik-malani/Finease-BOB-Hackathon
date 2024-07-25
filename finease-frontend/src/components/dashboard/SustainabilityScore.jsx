@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const API_URL = 'https://finease-backend.azurewebsites.net';
 const SustainabilityScore = () => {
   const [chartUrl, setChartUrl] = useState('');
   const [score, setScore] = useState('');
@@ -10,11 +11,11 @@ const SustainabilityScore = () => {
     const fetchData = async () => {
       try {
 
-        const response = await axios.get('http://127.0.0.1:5000/sustainable_transactions');
+        const response = await axios.get(`${API_URL}/sustainable_transactions`);
         setScore(response.data.score);
         setReasoning(response.data.reasoning);
 
-        const chartResponse = await axios.get('http://127.0.0.1:5000/calculate_percentages');
+        const chartResponse = await axios.get(`${API_URL}/calculate_percentages`);
         setChartUrl(chartResponse.data.chart_url);
       } catch (error) {
         console.error('Error fetching data:', error);

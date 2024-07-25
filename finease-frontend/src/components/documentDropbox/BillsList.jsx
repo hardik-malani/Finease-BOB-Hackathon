@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_URL = 'https://finease-backend.azurewebsites.net';
+
 const BillsList = () => {
   const [bills, setBills] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchBills = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/get_transactions');
+        const response = await axios.get(`${API_URL}/get_transactions`);
         setBills(response.data.slice(0, 5)); 
       } catch (error) {
         console.error('Error fetching transactions:', error);
+        setError('Error fetching transactions. Please try again later.');
       }
     };
 
@@ -20,6 +24,7 @@ const BillsList = () => {
   return (
     <div className="w-full md:w-1/2 lg:w-1/3 p-4">
       <h2 className="text-lg font-semibold mb-4">Your Bills</h2>
+      {error && <p className="text-red-600 mb-4">{error}</p>}
       {bills.length > 0 ? (
         bills.map((bill, index) => {
           const parts = bill.split(' ');

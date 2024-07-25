@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaMicrophone, FaPaperPlane, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import axios from 'axios';
 
+const API_URL = 'https://finease-backend.azurewebsites.net';
 const ChatInterface = () => {
   const initialMessages = [
     {
@@ -38,7 +39,7 @@ const ChatInterface = () => {
     setMessages([...messages, userMessage]);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/chatbot', { query: input, messages, language: selectedLanguage });
+      const response = await axios.post(`${API_URL}/chatbot`, { query: input, messages, language: selectedLanguage });
       const botResponse = response.data.response;
       const assistantMessage = { id: messages.length + 1, sender: 'assistant', content: botResponse, isSpeaking: false };
 

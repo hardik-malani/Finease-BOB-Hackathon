@@ -17,8 +17,14 @@ import re
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/')
+def home():
+    print('Flask working.')
+    return 'Flask working.'
+
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 GPT4V_KEY = "<key>"  
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
@@ -26,6 +32,7 @@ GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/
 # store transactions
 transactions = []
 uploaded_files = []
+
 
 # extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -43,35 +50,35 @@ def parse_transactions(text):
 # Upload PDF and extract transactions
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
-    global transactions
+    try:
+        global transactions
+        if 'files' not in request.files:
+            return jsonify({'error': 'No files part in the request'}), 400
 
-    if 'files' not in request.files:
-        return jsonify({'error': 'No files part in the request'}), 400
+        files = request.files.getlist('files')
+        if not files:
+            return jsonify({'error': 'No file selected'}), 400
 
-    files = request.files.getlist('files')
-    if not files:
-        return jsonify({'error': 'No file selected'}), 400
+        transactions = []
+        for file in files:
+            if file and file.filename.endswith('.pdf'):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
 
-    for file in files:
-        if file and file.filename.endswith('.pdf'):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
+                text = extract_text_from_pdf(file_path)
+                transactions.extend(parse_transactions(text))
 
-            # Extract text from PDF
-            text = extract_text_from_pdf(file_path)
+        return jsonify({'transactions': transactions}), 200
 
-            # Parse transactions from the text
-            transactions = parse_transactions(text)
-            print(transactions)
-
-            uploaded_files.append(filename)
-    
-    return jsonify({'uploaded_files': uploaded_files, 'transactions': transactions}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Bills
 @app.route('/get_transactions', methods=['GET'])
 def get_transactions():
+    global transactions
+    print("Transactions route")
     global transactions
     print("First 10 transactions:", transactions[:10])
     return jsonify(transactions[:10]), 200
@@ -79,9 +86,11 @@ def get_transactions():
 # Files uploaded
 @app.route('/get_uploaded_files', methods=['GET'])
 def get_uploaded_files():
+    global transactions
     return jsonify(uploaded_files), 200
 
 def get_income_expenses():
+    global transactions
     income = []
     expenses = []
     whitespace_pattern = re.compile(r'\s+')
@@ -100,6 +109,7 @@ def get_income_expenses():
 # Finance - expense and income
 @app.route('/get_income_expenses', methods=['GET'])
 def income_expenses():
+    global transactions
     try:
         result = get_income_expenses()
         return jsonify(result), 200
@@ -110,6 +120,7 @@ def income_expenses():
 # Get account balance
 @app.route('/get_account_balance', methods=['GET'])
 def get_account_balance():
+    global transactions
     balances = []
     whitespace_pattern = re.compile(r'\s+')
 
@@ -125,6 +136,7 @@ def get_account_balance():
 # Finance Summary
 @app.route('/get_summary', methods=['GET'])
 def get_summary():
+    global transactions
     summary = get_income_expenses()
     income = sum(summary["income"]) if summary["income"] else 0
     expenses = sum(summary["expenses"]) if summary["expenses"] else 0
@@ -144,6 +156,7 @@ def get_summary():
 # Model 1: Sustainable transactions
 @app.route('/sustainable_transactions', methods=['GET'])
 def sustainable_transactions():
+    global transactions
     headers = {
         "Content-Type": "application/json",
         "api-key": GPT4V_KEY,
@@ -174,6 +187,7 @@ def sustainable_transactions():
     return jsonify({"score": score, "reasoning": reasoning})
 
 def parse_result(result):
+    global transactions
     lines = result.split('\n')
     if len(lines) > 1:
         score = lines[0].strip()
@@ -186,7 +200,7 @@ def parse_result(result):
 # Model 2: Calculate and display percentages
 @app.route('/calculate_percentages', methods=['GET'])
 def calculate_and_display_percentages():
-
+    global transactions
     if not transactions:
         return jsonify({
             'percentages_text': 'No transactions available.',
@@ -226,6 +240,7 @@ def serve_static(filename):
 
 
 def categorize_transaction(transaction):
+    global transactions
     headers = {
         "Content-Type": "application/json",
         "api-key": GPT4V_KEY,
@@ -258,6 +273,7 @@ def categorize_transactions(transactions):
 # Model 3: Display risk analysis score
 @app.route('/risk_analysis', methods=['GET'])
 def get_risk_analysis_score():
+    global transactions
     headers = {
         "Content-Type": "application/json",
         "api-key": GPT4V_KEY,
@@ -382,6 +398,7 @@ def interact_with_chatbot(messages, api_key, endpoint):
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
+    global transactions
     user_query = request.json.get("query", "")
     messages = request.json.get("messages", [])
 
@@ -426,6 +443,5 @@ def chatbot():
 
 
 if __name__ == '__main__':
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
-    app.run(debug=True)
+    app.run()
+
