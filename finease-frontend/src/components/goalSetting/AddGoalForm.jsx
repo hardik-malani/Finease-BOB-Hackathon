@@ -16,7 +16,14 @@ const AddGoalForm = ({ onGoalAdded }) => {
     };
 
     try {
-      const response = await axios.post('https://finease-bob-hackathon.onrender.com/goals', newGoal);
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      };
+      const response = await axios.post('https://finease-bob-hackathon.onrender.com/goals', newGoal, config);
       onGoalAdded(response.data);
       setGoalTitle('');
       setTargetAmount('');
