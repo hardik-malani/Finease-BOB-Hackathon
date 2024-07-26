@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
-  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(''); // State for error message
   const navigate = useNavigate();
@@ -11,13 +11,14 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const userData = { name, password };
+    const userData = { email, password };
 
     try {
+      console.log(userData);
       const response = await axios.post('https://finease-bob-hackathon.onrender.com/api/login', userData);
 
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userName', JSON.stringify(name));
+      localStorage.setItem('userName', JSON.stringify(email));
 
       console.log('Login successful:', response.data);
 
@@ -60,14 +61,14 @@ const Login = () => {
 
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="name" className="block text-gray-700 mb-2">Name</label>
+            <label htmlFor="name" className="block text-gray-700 mb-2">Email</label>
             <input
-              type="text"
-              id="name"
+              type="email"
+              id="email"
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
