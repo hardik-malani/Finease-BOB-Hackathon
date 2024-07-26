@@ -19,7 +19,14 @@ const GoalSetting = () => {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await axios.get('https://finease-bob-hackathon.onrender.com/goals');
+        const token = localStorage.getItem('token');
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/goals', config);
         setGoals(response.data);
       } catch (error) {
         console.error('Error fetching goals:', error);
