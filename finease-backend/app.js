@@ -24,6 +24,7 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 const userSchema = new mongoose.Schema({
+  uuid: { type: String, default: uuidv4, unique: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -105,13 +106,18 @@ const goalSchema = new mongoose.Schema({
   currentAmount: { type: Number, default: 0 },
   weeklyTarget: { type: Number, default: 0 },
   progress: { type: Number, default: 0 },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 
 const Goal = mongoose.model('Goal', goalSchema);
 
-app.post('/goals', async (req, res) => {
+app.post('/goals', authMiddleware, async (req, res) => {
   const { title, targetAmount } = req.body;
-  const newGoal = new Goal({ title, targetAmount });
+  const newGoal = new Goal({
+    title,
+    targetAmount,
+    user: req.user.id, 
+  });
   try {
     await newGoal.save();
     res.status(201).json(newGoal);
@@ -120,9 +126,9 @@ app.post('/goals', async (req, res) => {
   }
 });
 
-app.get('/goals', async (req, res) => {
+app.get('/goals', authMiddleware, async (req, res) => {
   try {
-    const goals = await Goal.find();
+    const goals = await Goal.find({ user: req.user.id }); 
     res.json(goals);
   } catch (error) {
     res.status(500).json({ error: error.message });
