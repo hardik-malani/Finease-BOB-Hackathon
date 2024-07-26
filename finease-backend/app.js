@@ -24,8 +24,8 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   password: { type: String, required: true },
 });
 
@@ -55,19 +55,17 @@ app.post('/api/signup', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  const { name, password } = req.body;
-
+  const { email, password } = req.body;
+  console.log(email, password);
   try {
-    let user = await User.findOne({ name });
+    let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
-
     const payload = {
       user: {
         id: user.id,
