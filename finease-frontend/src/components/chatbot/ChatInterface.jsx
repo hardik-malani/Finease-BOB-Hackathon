@@ -3,21 +3,22 @@ import { FaMicrophone, FaPaperPlane, FaVolumeUp, FaVolumeMute } from 'react-icon
 import axios from 'axios';
 
 const API_URL = 'https://finease-backend.azurewebsites.net';
+
 const ChatInterface = () => {
   const initialMessages = [
     {
       id: 0,
       sender: 'assistant',
       content: 'Hello! How can I assist you today?',
-      isSpeaking: false
-    }
+      isSpeaking: false,
+    },
   ];
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(initialMessages);
   const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [currentUtterance, setCurrentUtterance] = useState(null); 
+  const [currentUtterance, setCurrentUtterance] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -30,7 +31,11 @@ const ChatInterface = () => {
     e.preventDefault();
 
     if (input.trim().toLowerCase() === 'quit' || input.trim().toLowerCase() === 'exit') {
-      setMessages([...messages, { id: messages.length, sender: 'user', content: input }, { id: messages.length + 1, sender: 'assistant', content: 'Session ended.' }]);
+      setMessages([
+        ...messages,
+        { id: messages.length, sender: 'user', content: input },
+        { id: messages.length + 1, sender: 'assistant', content: 'Session ended.' },
+      ]);
       setInput('');
       return;
     }
@@ -39,18 +44,25 @@ const ChatInterface = () => {
     setMessages([...messages, userMessage]);
 
     try {
-      const response = await axios.post(`${API_URL}/chatbot`, { query: input, messages, language: selectedLanguage });
+      const response = await axios.post(`${API_URL}/chatbot`, {
+        query: input,
+        messages,
+        language: selectedLanguage,
+      });
       const botResponse = response.data.response;
-      const assistantMessage = { id: messages.length + 1, sender: 'assistant', content: botResponse, isSpeaking: false };
+      const assistantMessage = {
+        id: messages.length + 1,
+        sender: 'assistant',
+        content: botResponse,
+        isSpeaking: false,
+      };
 
       setMessages([...messages, userMessage, assistantMessage]);
-
 
       if (speechSynthesis.speaking) {
         speechSynthesis.cancel();
       }
 
- 
       const utterance = new SpeechSynthesisUtterance(botResponse);
       setCurrentUtterance(utterance);
 
@@ -104,7 +116,11 @@ const ChatInterface = () => {
       speechSynthesis.speak(utterance);
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage = { id: messages.length + 1, sender: 'assistant', content: 'Sorry, something went wrong.' };
+      const errorMessage = {
+        id: messages.length + 1,
+        sender: 'assistant',
+        content: 'Sorry, something went wrong.',
+      };
       setMessages([...messages, userMessage, errorMessage]);
     }
 
@@ -114,7 +130,7 @@ const ChatInterface = () => {
   const handleSpeechToText = async () => {
     try {
       const recognition = new window.webkitSpeechRecognition();
-      let langCode = 'en-US'; 
+      let langCode = 'en-US';
 
       switch (selectedLanguage) {
         case 'guj_Gujr':
@@ -171,7 +187,7 @@ const ChatInterface = () => {
       speechSynthesis.cancel();
     }
     const utterance = new SpeechSynthesisUtterance(response);
-    setCurrentUtterance(utterance); 
+    setCurrentUtterance(utterance);
     utterance.lang = selectedLanguage !== 'en-US' ? selectedLanguage : 'en-US';
     utterance.voice = speechSynthesis.getVoices().find((voice) => voice.lang === utterance.lang);
     utterance.onstart = () => setIsSpeaking(true);
@@ -182,36 +198,37 @@ const ChatInterface = () => {
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {Array.isArray(messages) && messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        {Array.isArray(messages) &&
+          messages.map((message) => (
             <div
-              className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-lg ${
-                message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
-              }`}
+              key={message.id}
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {message.content}
-              {message.sender === 'assistant' && (
-                <button
-                  type="button"
-                  className="ml-2 text-gray-400 hover:text-gray-600"
-                  onClick={() => handlePlayResponse(message.content)}
-                >
-                  {isSpeaking ? <FaVolumeMute /> : <FaVolumeUp />}
-                </button>
-              )}
+              <div
+                className={`max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl px-4 py-2 rounded-lg ${
+                  message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
+                }`}
+              >
+                {message.content}
+                {message.sender === 'assistant' && (
+                  <button
+                    type="button"
+                    className="ml-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => handlePlayResponse(message.content)}
+                  >
+                    {isSpeaking ? <FaVolumeMute /> : <FaVolumeUp />}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSubmit} className="bg-white px-4 py-2 flex items-center">
+      <form onSubmit={handleSubmit} className="bg-white p-2 flex items-center space-x-2">
         <select
           value={selectedLanguage}
           onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="mr-2 border p-1 rounded"
+          className="mr-2 border p-1 rounded w-24"
         >
           <option value="en-US">English</option>
           <option value="guj_Gujr">Gujarati</option>
@@ -233,21 +250,14 @@ const ChatInterface = () => {
         <button
           type="button"
           onClick={handleSpeechToText}
-          className="ml-2 text-gray-500 hover:text-gray-700"
+          className="text-gray-500 hover:text-gray-700"
         >
           <FaMicrophone />
         </button>
-        <button
-          type="submit"
-          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-        >
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           <FaPaperPlane />
         </button>
-        <button
-          type="button"
-          onClick={handleStopSpeech}
-          className="ml-2 text-red-500 hover:text-red-700"
-        >
+        <button type="button" onClick={handleStopSpeech} className="text-red-500 hover:text-red-700">
           Stop
         </button>
       </form>

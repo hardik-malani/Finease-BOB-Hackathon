@@ -34,8 +34,9 @@ const Dashboard = () => {
             'Authorization': `Bearer ${token}`
           }
         };
-        const response = await axios.get('http://localhost:5000/api/user', config);
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
         setUserName(response.data.name);
+        localStorage.setItem('userName', JSON.stringify(response.data.name));
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
