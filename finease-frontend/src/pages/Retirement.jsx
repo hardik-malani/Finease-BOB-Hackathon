@@ -5,17 +5,39 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import RetirementInfoForm from '../components/retirement/RetirementInfoForm';
 import data from '../data/retirementData.json';
+import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Retirement = () => {
   const [retirementData, setRetirementData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [userName, setUserName] = useState("");
+  
   useEffect(() => {
     setRetirementData(data);
   }, []);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+  
   if (!retirementData) return <div>Loading...</div>;
 
   const { user, retirementTracking } = retirementData;
