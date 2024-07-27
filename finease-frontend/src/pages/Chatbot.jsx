@@ -4,14 +4,36 @@ import ChatInterface from '../components/chatbot/ChatInterface';
 import RecentChats from '../components/chatbot/RecentChats';
 import chatbotData from '../data/chatbotData.json';
 import { FaBars, FaBell } from 'react-icons/fa';
+import axios from 'axios';
 
 const Chatbot = () => {
   const [data, setData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRecentChatsOpen, setIsRecentChatsOpen] = useState(false);
-
+  const [userName, setUserName] = useState("");
+  
   useEffect(() => {
     setData(chatbotData);
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   if (!data) return <div>Loading...</div>;
