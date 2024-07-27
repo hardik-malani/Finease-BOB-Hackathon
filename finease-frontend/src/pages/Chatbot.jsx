@@ -10,7 +10,6 @@ const Chatbot = () => {
   const [data, setData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRecentChatsOpen, setIsRecentChatsOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   
   useEffect(() => {
     setData(chatbotData);
