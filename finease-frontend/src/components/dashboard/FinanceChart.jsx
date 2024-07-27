@@ -4,8 +4,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-
 const API_URL = 'https://finease-backend.azurewebsites.net';
+
 const FinanceChart = ({ title }) => {
   const [chartData, setChartData] = useState({
     labels: [], // Dates or other categories
@@ -34,15 +34,14 @@ const FinanceChart = ({ title }) => {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        
-        // Transform data into chart format
-        const labels = []; // You may want to set this to actual dates or labels
-        const incomeData = data.income;
-        const expenseData = data.expenses;
 
-        // Example transformation: just using index as label for demo
+        // Transform data into chart format
+        const labels = Array.from({ length: Math.max(data.income.length, data.expenses.length) }, (_, i) => `Entry ${i + 1}`);
+        const incomeData = data.income || [];
+        const expenseData = data.expenses || [];
+
         setChartData({
-          labels: Array.from({ length: Math.max(incomeData.length, expenseData.length) }, (_, i) => `Entry ${i + 1}`),
+          labels: labels,
           datasets: [
             {
               label: 'Income',

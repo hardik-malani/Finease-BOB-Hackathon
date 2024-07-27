@@ -1,50 +1,128 @@
-import React from 'react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useState } from 'react';
+import SavingsProjection from './SavingsProjection';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+const API_URL = 'https://finease-backend.azurewebsites.net';
 
-const SavingsProjection = ({ data }) => {
-  const chartData = {
-    labels: data.dates,
-    datasets: [
-      {
-        label: 'Savings',
-        data: data.savings,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        fill: true,
-      },
-    ],
+const RetirementInfoForm = ({ initialInfo }) => {
+  const [info, setInfo] = useState(initialInfo);
+  const [savingsData, setSavingsData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInfo({
+      ...info,
+      [name]: value,
+    });
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Year',
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_URL}/retirement_planning`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Savings (Rs)',
-        },
-        ticks: {
-          beginAtZero: true,
-        },
-      },
-    },
+        body: JSON.stringify(info),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch savings data');
+      }
+
+      const data = await response.json();
+      setSavingsData(data.retirementTracking);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="relative h-64 lg:h-80 p-4 bg-white rounded-lg shadow-md">
-      <Line data={chartData} options={options} />
+    <div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block mb-2">Current Age</label>
+          <input
+            type="number"
+            name="currentAge"
+            value={info.currentAge}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block mb-2">Retirement Age</label>
+          <input
+            type="number"
+            name="retirementAge"
+            value={info.retirementAge}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block mb-2">Marital Status</label>
+          <select
+            name="maritalStatus"
+            value={info.maritalStatus}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          >
+            <option value="Married">Married</option>
+            <option value="Single">Single</option>
+            <option value="Divorced">Divorced</option>
+            <option value="Widowed">Widowed</option>
+          </select>
+        </div>
+        <div>
+          <label className="block mb-2">Spouse Age</label>
+          <input
+            type="number"
+            name="spouseAge"
+            value={info.spouseAge}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block mb-2">Work Income</label>
+          <input
+            type="number"
+            name="workIncome"
+            value={info.workIncome}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block mb-2">Current Saving</label>
+          <input
+            type="number"
+            name="currentSaving"
+            value={info.currentSaving}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="md:col-span-2 mx-auto">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            Save
+          </button>
+        </div>
+      </form>
+
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      {savingsData && <SavingsProjection data={savingsData} />}
     </div>
   );
 };
 
-export default SavingsProjection;
+export default RetirementInfoForm;

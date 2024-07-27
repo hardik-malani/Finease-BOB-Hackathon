@@ -11,7 +11,8 @@ const BillsList = () => {
     const fetchBills = async () => {
       try {
         const response = await axios.get(`${API_URL}/get_transactions`);
-        setBills(response.data.slice(0, 5)); 
+        const transactionData = response.data.transactions || []; // Default to empty array if 'transactions' key is missing
+        setBills(transactionData.slice(0, 5)); 
       } catch (error) {
         console.error('Error fetching transactions:', error);
         setError('Error fetching transactions. Please try again later.');
@@ -27,21 +28,20 @@ const BillsList = () => {
       {error && <p className="text-red-600 mb-4">{error}</p>}
       {bills.length > 0 ? (
         bills.map((bill, index) => {
-          const parts = bill.split(' ');
-          const date = `${parts[0]} ${parts[1]}, ${parts[2]}`;
-          const amountIndex = parts.findIndex(part => part.match(/^-?\d+\.\d{2}$/));
-          const amount = amountIndex !== -1 ? parts[amountIndex] : 'N/A';
-          const balance = parts[parts.length - 1];
-          const transaction = parts.slice(3, amountIndex).join(' ');
+          // Destructure and provide default values
+          const { Date: date = 'N/A', Transaction: transaction = 'N/A', Amount: amount = '0.00', Balance: balance = '0.00' } = bill;
 
+          // Ensure amount is a string for comparison
+          const amountStr = String(amount).trim();
+          
           return (
             <div key={index} className="border rounded-lg p-4 mb-4 shadow-lg bg-white">
               <div className="text-lg font-medium mb-2">Date: {date}</div>
               <div className="text-sm mb-2">Transaction: {transaction}</div>
-              <div className={`text-sm mb-2 ${amount.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
-                Amount: {amount}
+              <div className={`text-sm mb-2 ${amountStr.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
+                Amount: {amountStr || 'N/A'}
               </div>
-              <div className="text-sm mb-4">Balance: {balance}</div>
+              <div className="text-sm mb-4">Balance: {balance || 'N/A'}</div>
             </div>
           );
         })
