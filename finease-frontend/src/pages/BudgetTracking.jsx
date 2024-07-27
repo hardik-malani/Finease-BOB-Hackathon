@@ -9,13 +9,34 @@ import QuickTransaction from '../components/budgetTracking/QuickTransaction';
 import TransactionHistory from '../components/dashboard/TransactionHistory';
 import Card from '../components/budgetTracking/Card';
 import data from '../data/budgetTrackingData.json';
+import axios from 'axios';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const BudgetTracking = () => {
   const [budgetData, setBudgetData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userName, setUserName] = useState("");
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+      };
+      const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
+      setUserName(response.data.name);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
+    fetchUserData();
+  }, []);
   useEffect(() => {
     setBudgetData(data);
     console.log("Loaded budget data:", data);
