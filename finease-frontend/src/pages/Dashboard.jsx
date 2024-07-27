@@ -11,7 +11,6 @@ import TransactionHistory from '../components/dashboard/TransactionHistory';
 import RetirementTracking from '../components/dashboard/RetirementTracking';
 import SustainabilityScore from '../components/dashboard/SustainabilityScore';
 import GoalsSetting from '../components/dashboard/GoalsSetting';
-import { FaBars } from 'react-icons/fa';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement);
 

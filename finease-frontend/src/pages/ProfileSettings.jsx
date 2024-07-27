@@ -9,7 +9,6 @@ import axios from 'axios';
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   
   // Simulating data fetch with useEffect
   React.useEffect(() => {

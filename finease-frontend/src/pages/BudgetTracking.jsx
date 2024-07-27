@@ -16,7 +16,6 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const BudgetTracking = () => {
   const [budgetData, setBudgetData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   
   useEffect(() => {
     const fetchUserData = async () => {

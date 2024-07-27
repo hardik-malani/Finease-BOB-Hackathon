@@ -12,7 +12,6 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 const Retirement = () => {
   const [retirementData, setRetirementData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userName, setUserName] = useState("");
   
   useEffect(() => {
     setRetirementData(data);
