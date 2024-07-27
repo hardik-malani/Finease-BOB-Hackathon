@@ -4,15 +4,37 @@ import Header from '../components/layout/Header';
 import ProfileInfo from '../components/profileSettings/ProfileInfo';
 import ProfileSettings from '../components/profileSettings/PlatformSettings';
 import data from '../data/profileData.json';
+import axios from 'axios';
 
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [userName, setUserName] = useState("");
+  
   // Simulating data fetch with useEffect
   React.useEffect(() => {
     // Replace with actual data fetching logic
     setProfileData(data);
+  }, []);
+
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   if (!profileData) return <div>Loading...</div>;
