@@ -28,7 +28,7 @@ const InvestmentPortfolio = () => {
             'Authorization': `Bearer ${token}`
           }
         };
-        const response = await axios.get('http://localhost:5001/api/user', config);
+        const response = await axios.get('https://finease-bob-hackathon.onrender.com/api/user', config);
         setUserName(response.data.name);
       } catch (error) {
         console.error('Error fetching user data:', error);
