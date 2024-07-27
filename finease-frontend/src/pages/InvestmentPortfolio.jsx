@@ -7,23 +7,41 @@ import TradeHistory from '../components/investmentPortfolio/TradeHistory';
 import StockOptions from '../components/investmentPortfolio/StockOptions';
 import data from '../data/investmentPortfolioData.json';
 import { FaBars } from 'react-icons/fa';
+import axios from 'axios';
 
 const InvestmentPortfolio = () => {
   const [portfolioData, setPortfolioData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [userName, setUserName] = useState("");
+  
   useEffect(() => {
     setPortfolioData(data);
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from local storage
+        const config = {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        const response = await axios.get('http://localhost:5001/api/user', config);
+        setUserName(response.data.name);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   if (!portfolioData) return <div>Loading...</div>;
 
   const { user, stockPerformance, recommendedStocks, tradeHistory, portfolioSummary } = portfolioData;
-  const storedUserName = localStorage.getItem('userName');
-  const userName = storedUserName ? JSON.parse(storedUserName) : 'Default Name';
   
-
-
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
       {/* Sidebar */}
