@@ -12,11 +12,14 @@ import os
 import re
 import time
 import json
+import fitz
+from PIL import Image
+from base64 import b64encode
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+app.config['UPLOAD_FOLDER'] = '/home/site/wwwroot/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 GPT4V_KEY = "<key>"
@@ -47,12 +50,69 @@ def clear_data():
 
 
 
-# Extract text from PDF
-def extract_text_from_pdf(pdf_path):
-    reader = PdfReader(pdf_path)
+# Function to encode an image to base64
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return b64encode(image_file.read()).decode("utf-8")
+
+# Function to extract text from an image using Azure OpenAI GPT-4
+def extract_text_from_image(image_path):
+    base64_image = encode_image(image_path)
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {GPT4V_KEY}"
+    }
+
+    payload = {
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Extract the text from the given image and return as string"
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "temperature": 0.2,
+        "top_p": 1,
+        "max_tokens": 1000
+    }
+
+    response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload)
+    result = response.json()
+    print("result:", result)  
+
+    if 'choices' in result and len(result['choices']) > 0:
+        return result['choices'][0]['message']['content']
+    else:
+        print("Error: 'choices' not found in the response or empty choices list")
+        return None
+
+# Function to convert PDF pages to images and extract text from them
+def extract_text_from_pdf(pdf_path, image_output_folder):
+    os.makedirs(image_output_folder, exist_ok=True)
     text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
+
+    doc = fitz.open(pdf_path)
+    for page_number in range(doc.page_count):
+        page = doc[page_number]
+        pix = page.get_pixmap()
+        image_path = os.path.join(image_output_folder, f"page_{page_number}.png")
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        img.save(image_path)
+
+        extracted_text = extract_text_from_image(image_path)
+        if extracted_text:
+            text += extracted_text + "\n"
+
     return text
 
 
@@ -67,7 +127,7 @@ def extract_format():
 def parse_transactions(text):
     lines = text.split('\n')
     # return [line for line in lines if any(keyword in line for keyword in ['UPI/', 'POS/', 'IMPS/', 'NEFT/', 'RTGS/'])]
-    return lines[:30]
+    return lines
 
 # Upload PDF and extract transactions
 @app.route('/upload_pdf', methods=['POST'])
@@ -101,12 +161,14 @@ def upload_pdf():
                 first_few_transactions = transactions[:10]
                 split_transactions = get_split_transactions(first_few_transactions)
 
-        return jsonify({'transactions': split_transactions}), 200
+        return jsonify({'transactions': split_transactions, 'text': text}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 def get_split_transactions(transaction_texts):
     headers = {
@@ -380,7 +442,11 @@ def get_risk_analysis_score():
 initial_messages = [
     {
         "role": "system",
-        "content": "You are an AI assistant that helps people find financial information and provide personalized advice based on their bank statements."
+        "content": "You are an AI assistant that helps people find financial information and provide personalized advice based on their bank statements. Do not give irrelevant information, keep your information focused."
+    },
+    {
+        "role": "system",
+        "content": "If someone asks about BOB or Bank of Baroda related queries, follow this website: https://www.bankofbaroda.in/"
     },
     {
         "role": "assistant",
@@ -397,9 +463,9 @@ def interact_with_chatbot(messages, api_key, endpoint):
 
     payload = {
         "messages": messages,
-        "temperature": 0.7,
+        "temperature": 0.2,
         "top_p": 0.95,
-        "max_tokens": 800
+        "max_tokens": 400
     }
 
     try:
@@ -429,7 +495,7 @@ def chatbot():
     # Add the transactions to the conversation
     transactions_message = {
         "role": "assistant",
-        "content": "Here are the transactions I found:\n" + "\n".join(transactions)
+        "content": "Here are the transactions I found:\n" + "\n".join(transactions) + "Keep the information limited to the transactions, do not utter other information"
     }
     if not any(msg['role'] == 'assistant' and 'transactions' in msg['content'] for msg in validated_messages):
         validated_messages.append(transactions_message)
