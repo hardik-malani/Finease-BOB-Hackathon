@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import SavingsProjection from './SavingsProjection';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const API_URL = 'https://finease-backend.azurewebsites.net/retirement_planning';
 
-const RetirementInfoForm = () => {
+const RetirementInfoForm = ({ initialInfo = {} }) => {
   const [info, setInfo] = useState({
     currentAge: '',
     retirementAge: '',
     maritalStatus: 'Married',
     spouseAge: '',
     workIncome: '',
-    currentSaving: ''
+    currentSaving: '',
+    ...initialInfo
   });
   const [savingsData, setSavingsData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -120,14 +121,28 @@ const RetirementInfoForm = () => {
         </div>
         <div className="md:col-span-2 mx-auto">
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-            Save
+            Calculate Retirement Savings
           </button>
         </div>
       </form>
 
       {loading && <div>Loading...</div>}
       {error && <div>Error: {error}</div>}
-      {savingsData && <SavingsProjection data={savingsData} />}
+      {savingsData && (
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">Retirement Savings Projection</h2>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={savingsData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="savings" stroke="#8884d8" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };

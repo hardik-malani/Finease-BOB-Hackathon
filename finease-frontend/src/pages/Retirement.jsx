@@ -78,8 +78,7 @@ const Retirement = () => {
 
         {/* Retirement Chart */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">How long will my savings last?</h2>
-          <Line data={retirementChartData} />
+          <h2 className="text-xl font-semibold mb-4">What are my estimated savings in that year?</h2>
         </div>
 
         {/* Retirement Info Form */}

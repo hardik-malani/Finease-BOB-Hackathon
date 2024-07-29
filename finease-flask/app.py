@@ -3,8 +3,6 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PyPDF2 import PdfReader
 import requests
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import io
 from collections import Counter
@@ -12,17 +10,17 @@ import os
 import re
 import time
 import json
-import fitz
-from PIL import Image
-from base64 import b64encode
+
+# from tabula import read_pdf
+# import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['UPLOAD_FOLDER'] = '/home/site/wwwroot/uploads'
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "<key>"
+GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
@@ -48,72 +46,28 @@ def clear_data():
 
     return jsonify({'message': 'Data cleared successfully'}), 200
 
-
-
-# Function to encode an image to base64
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return b64encode(image_file.read()).decode("utf-8")
-
-# Function to extract text from an image using Azure OpenAI GPT-4
-def extract_text_from_image(image_path):
-    base64_image = encode_image(image_path)
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {GPT4V_KEY}"
-    }
-
-    payload = {
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "Extract the text from the given image and return as string"
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
-            }
-        ],
-        "temperature": 0.2,
-        "top_p": 1,
-        "max_tokens": 1000
-    }
-
-    response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload)
-    result = response.json()
-    print("result:", result)  
-
-    if 'choices' in result and len(result['choices']) > 0:
-        return result['choices'][0]['message']['content']
-    else:
-        print("Error: 'choices' not found in the response or empty choices list")
-        return None
-
-# Function to convert PDF pages to images and extract text from them
-def extract_text_from_pdf(pdf_path, image_output_folder):
-    os.makedirs(image_output_folder, exist_ok=True)
+# Extract text from PDF
+def extract_text_from_pdf(pdf_path):
+    reader = PdfReader(pdf_path)
     text = ""
-
-    doc = fitz.open(pdf_path)
-    for page_number in range(doc.page_count):
-        page = doc[page_number]
-        pix = page.get_pixmap()
-        image_path = os.path.join(image_output_folder, f"page_{page_number}.png")
-        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-        img.save(image_path)
-
-        extracted_text = extract_text_from_image(image_path)
-        if extracted_text:
-            text += extracted_text + "\n"
-
+    for page in reader.pages:
+        text += page.extract_text() or ""
     return text
+
+# def extract_text_from_pdf(pdf_path):
+#     # Read the table from the PDF file
+#     dfs = read_pdf(pdf_path, pages="all", multiple_tables=True)
+
+#     # Concatenate all dataframes into one
+#     if not dfs:
+#         return ""  # Return an empty string if no tables are found
+
+#     combined_df = pd.concat(dfs, ignore_index=True)
+
+#     # Convert the dataframe to a string, joining all cells with a space
+#     text = combined_df.apply(lambda x: ' '.join(x.astype(str)), axis=1).str.cat(sep='\n')
+
+#     return text
 
 
 # Extract format of bank statement
@@ -158,17 +112,15 @@ def upload_pdf():
                 transactions.extend(parsed_transactions)
 
             if transactions:
-                first_few_transactions = transactions[:10]
+                first_few_transactions = transactions[:50]
                 split_transactions = get_split_transactions(first_few_transactions)
 
-        return jsonify({'transactions': split_transactions, 'text': text}), 200
+        return jsonify({'transactions': split_transactions}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/download/<filename>')
-def download_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 def get_split_transactions(transaction_texts):
     headers = {
@@ -184,13 +136,16 @@ def get_split_transactions(transaction_texts):
             {
                 "role": "user",
                 "content": f"""Return me a python list of dictionaries for each of the transaction, 
-                for each transaction the dictionary keys should be Date(STRING), Transaction(STRING), Amount(FLOAT), Balance(FLOAT), 
-                Make amount as negative float if it is withdrawal (JUST GIVE THE LIST, NO EXTRA TEXT):\n\n{transactions_text}, 
-                the transaction key should display the transaction information
+                for each transaction the dictionary keys should be Date(STRING), Transaction(STRING), Amount(FLOAT), Balance(FLOAT), \n
+                Make amount as negative float if it is withdrawal (JUST GIVE THE LIST, NO EXTRA TEXT):\n\n, 
+                The transaction information is: {transactions_text} \n\n
+                DO NOT FABRICATE INFORMATION ON YOUR OWN. \n
+                The transaction key should display the transaction information; what is the transaction about? \n 
+
                 the format of the text is: {format}"""
             }
         ],
-        "temperature": 0.5,
+        "temperature": 0.2,
         "top_p": 1,
         "max_tokens": 1000
     }
@@ -319,10 +274,11 @@ def sustainable_transactions():
         "messages": [
             {
                 "role": "user",
-                "content": f"Based on the following transactions, provide an overall estimated sustainability score from 1 to 100 given the impact those transactions have on the environment, give just the integer score without formatting. In the next line, give a brief reasoning:\n\n{transactions_text}"
+                "content": f"""Based on the following transactions, provide an overall estimated sustainability score from 1 to 100 given the impact those transactions have on the environment, give just the integer score without formatting. In the next line, give a brief reasoning:\n\n
+                Transaction information: {transactions_text}"""
             }
         ],
-        "temperature": 0.5,
+        "temperature": 0.3,
         "top_p": 1,
         "max_tokens": 1000
     }
@@ -454,7 +410,6 @@ initial_messages = [
     }
 ]
 
-
 def interact_with_chatbot(messages, api_key, endpoint):
     headers = {
         "Content-Type": "application/json",
@@ -465,7 +420,7 @@ def interact_with_chatbot(messages, api_key, endpoint):
         "messages": messages,
         "temperature": 0.2,
         "top_p": 0.95,
-        "max_tokens": 400
+        "max_tokens": 100
     }
 
     try:
@@ -521,26 +476,27 @@ def chatbot():
         validated_messages.append({"role": "assistant", "content": error_message})
         return jsonify({"response": error_message, "messages": validated_messages})
 
-# Retirement Planning Chart
 @app.route('/retirement_planning', methods=['POST'])
 def retirement_planning():
     data = request.json
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    balances = "\n".join([f"Balance: {t.get('Balance', 'N/A')}" for t in split_transactions])
-    prompt = (
-        f"""Return me a python dictionary with keys 'dates' and 'savings' for an estimated amount the user should save based on their information in the years:\n"
-        ['2024', '2026', '2028', '2030', '2032', '2034', '2036', '2038', '2040', '2042', '2044', '2046', '2048', '2050', '2052', '2054', '2056', '2058', '2060', '2062', '2064', '2066']\n"
-        These are the recent balances: {balances}\n"
-        Current Age: {data.get('currentAge', 'N/A')}\n"
-        Retirement Age: {data.get('retirementAge', 'N/A')}\n"
-        Marital Status: {data.get('maritalStatus', 'N/A')}\n"
-        Spouse Age: {data.get('spouseAge', 'N/A')}\n"
-        Work Income: {data.get('workIncome', 'N/A')}\n"
-        Current Saving: {data.get('currentSaving', 'N/A')}\n\n"
-        Output format: Only List of dictionaries with keys 'date' and 'savings'.\n"""
-    )
+    balances = "\n".join([f"Balance: {t.get('Balance', 'N/A')}" for t in data.get('split_transactions', [])])
+    prompt = f"""
+    What are my estimated savings in that year based on the following information:
+    Current Age: {data.get('currentAge', 'N/A')}
+    Retirement Age: {data.get('retirementAge', 'N/A')}
+    Marital Status: {data.get('maritalStatus', 'N/A')}
+    Spouse Age: {data.get('spouseAge', 'N/A')}
+    Work Income: {data.get('workIncome', 'N/A')}
+    Current Saving: {data.get('currentSaving', 'N/A')}
+    Recent balances: {balances}
+
+    Provide a list of dictionaries with keys 'date' and 'savings' for the years 2024 to 2066 in 2-year intervals.
+    The 'savings' value should represent the estimated cumulative savings at that date.
+    Format the output as a JSON array of objects.
+    """
 
     headers = {
         "Content-Type": "application/json",
@@ -563,21 +519,19 @@ def retirement_planning():
         response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
         result = response.json()['choices'][0]['message']['content'].strip()
-        match = re.search(r'\{.*?\}', result, re.DOTALL)
+        
+        # Extract the JSON array from the response
+        match = re.search(r'\[.*?\]', result, re.DOTALL)
         if match:
-            result = match.group(0).strip()
-            try:
-                parsed_result = json.loads(result)
-                return jsonify({"retirementTracking": parsed_result})
-            except json.JSONDecodeError:
-                return jsonify({"error": "Failed to decode JSON from the model's response"}), 500
+            parsed_result = json.loads(match.group(0))
+            return jsonify({"retirementTracking": parsed_result})
         else:
             return jsonify({"error": "Failed to extract JSON from the model's response"}), 500
     except requests.RequestException as e:
         print(f"Failed to get retirement planning. Error: {e}")
         return jsonify({"error": "Failed to get retirement planning"}), 500
-
+    except json.JSONDecodeError:
+        return jsonify({"error": "Failed to decode JSON from the model's response"}), 500
 
 if __name__ == '__main__':
     app.run()
-

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js';
 
@@ -8,28 +8,26 @@ const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const BudgetChart = () => {
   const [budgetBreakdown, setBudgetBreakdown] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Fetch categorized expenses from the backend
-    const fetchBudgetBreakdown = async () => {
-      try {
-        const response = await fetch(`${API_URL}/calculate_percentages`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const data = await response.json();
-        setBudgetBreakdown(data.percentages);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+  const fetchBudgetBreakdown = async () => {
+    setLoading(true);
+    setError(null);
 
-    fetchBudgetBreakdown();
-  }, []);
+    try {
+      const response = await fetch(`${API_URL}/calculate_percentages`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setBudgetBreakdown(data.percentages);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const data = {
     labels: budgetBreakdown.map(item => item.category),
@@ -61,20 +59,22 @@ const BudgetChart = () => {
     maintainAspectRatio: false,
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Budget Breakdown</h2>
-      <div style={{ height: '200px' }}>
-        <Doughnut data={data} options={options} />
-      </div>
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      {!loading && !error && (
+        <div style={{ height: '200px' }}>
+          <Doughnut data={data} options={options} />
+        </div>
+      )}
+      <button 
+        onClick={fetchBudgetBreakdown}
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+      >
+        Update
+      </button>
     </div>
   );
 };
