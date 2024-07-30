@@ -11,6 +11,7 @@ const BudgetChart = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Function to fetch budget breakdown data from the API
   const fetchBudgetBreakdown = async () => {
     setLoading(true);
     setError(null);
@@ -29,6 +30,7 @@ const BudgetChart = () => {
     }
   };
 
+  // Data structure for the Doughnut chart
   const data = {
     labels: budgetBreakdown.map(item => item.category),
     datasets: [
@@ -43,6 +45,7 @@ const BudgetChart = () => {
     ],
   };
 
+  // Chart options
   const options = {
     plugins: {
       legend: {
@@ -69,6 +72,7 @@ const BudgetChart = () => {
           <Doughnut data={data} options={options} />
         </div>
       )}
+      {/* Button to trigger the API call */}
       <button 
         onClick={fetchBudgetBreakdown}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"

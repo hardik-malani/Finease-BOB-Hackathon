@@ -11,7 +11,7 @@ const BillsList = () => {
     const fetchBills = async () => {
       try {
         const response = await axios.get(`${API_URL}/get_transactions`);
-        const transactionData = response.data.transactions || []; // Default to empty array if 'transactions' key is missing
+        const transactionData = response.data.transactions || []; 
         setBills(transactionData.slice(0, 5)); 
       } catch (error) {
         console.error('Error fetching transactions:', error);

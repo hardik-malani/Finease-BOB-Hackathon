@@ -18,7 +18,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "<key>"
+GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
@@ -422,16 +422,19 @@ initial_messages = [
     {
         "role": "system",
         "content": """You are an AI assistant that helps people find financial information and provide 
-        personalized advice based on their bank statements. Do not give irrelevant information, 
-        keep your information focused. Give information only about transactions, not the Bank"""
-    },
-    {
-        "role": "system",
-        "content": "If someone asks about BOB or Bank of Baroda related queries, follow this website: https://www.bankofbaroda.in/"
+        personalized advice based on their bank statements. Focus only on transactions and Bank of Baroda information.
+        Do not provide information about other banks. If asked about other banks, politely refuse and redirect to Bank of Baroda."""
     },
     {
         "role": "assistant",
-        "content": "I have extracted your transactions from the uploaded bank statement. How can I assist you today?"
+        "content": """For Bank of Baroda related queries, refer to this website: https://www.bankofbaroda.in/
+        If asked about other banks, respond with: 'I'm sorry, but I can only provide information about Bank of Baroda. 
+        How can I assist you with Bank of Baroda services or your transactions?'
+        Always try to promote Bank of Baroda services when appropriate."""
+    },
+    {
+        "role": "assistant",
+        "content": "I have extracted your transactions from the uploaded bank statement. How can I assist you with your transactions or Bank of Baroda services today?"
     }
 ]
 
@@ -445,7 +448,7 @@ def interact_with_chatbot(messages, api_key, endpoint):
         "messages": messages,
         "temperature": 0.2,
         "top_p": 0.95,
-        "max_tokens": 100
+        "max_tokens": 500
     }
 
     try:
@@ -458,40 +461,37 @@ def interact_with_chatbot(messages, api_key, endpoint):
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
-    global transactions
+    global transactions, initial_messages
     user_query = request.json.get("query", "")
     messages = request.json.get("messages", [])
 
     # Initialize messages if not provided
-    if not messages:
-        messages = initial_messages.copy()
-    
+    messages = initial_messages.copy()
+
     # Ensure messages are properly formatted
     validated_messages = []
     for msg in messages:
         if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
             validated_messages.append(msg)
-    
+
     # Add the transactions to the conversation
     transactions_message = {
         "role": "assistant",
-        "content": "Here are the transactions I found:\n" + "\n".join(transactions) + "Keep the information limited to the transactions, do not utter other information"
+        "content": "Here are the transactions:\n" + "\n".join(transactions) + "\nKeep the information limited to the transactions, do not utter other information"
     }
     if not any(msg['role'] == 'assistant' and 'transactions' in msg['content'] for msg in validated_messages):
         validated_messages.append(transactions_message)
-    
+
     if user_query.lower() in ['quit', 'exit', 'q']:
         validated_messages.append({"role": "user", "content": user_query})
         validated_messages.append({"role": "assistant", "content": "Session ended."})
         return jsonify({"response": "Session ended.", "messages": validated_messages})
 
-    # Add the user message to the conversation
     user_message = {"role": "user", "content": user_query}
     validated_messages.append(user_message)
 
-    # Call the chatbot API
     response = interact_with_chatbot(validated_messages, GPT4V_KEY, GPT4V_ENDPOINT)
-    
+
     if response is not None:
         assistant_message = response['choices'][0]['message']['content'].strip()
         validated_messages.append({"role": "assistant", "content": assistant_message})
@@ -500,6 +500,7 @@ def chatbot():
         error_message = "Sorry, something went wrong."
         validated_messages.append({"role": "assistant", "content": error_message})
         return jsonify({"response": error_message, "messages": validated_messages})
+
 
 @app.route('/retirement_planning', methods=['POST'])
 def retirement_planning():
