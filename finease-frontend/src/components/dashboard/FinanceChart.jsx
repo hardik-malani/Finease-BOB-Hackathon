@@ -8,7 +8,7 @@ const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const FinanceChart = ({ title }) => {
   const [chartData, setChartData] = useState({
-    labels: [], // Dates or other categories
+    labels: [], 
     datasets: [
       {
         label: 'Income',

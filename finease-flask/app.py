@@ -18,7 +18,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
+GPT4V_KEY = "<key>"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
@@ -50,7 +50,7 @@ def extract_text_from_pdf(pdf_path):
     text = ""
     for page in reader.pages:
         text += page.extract_text() or ""
-    return text
+    return text[:2500]
 
 # Extract format of bank statement
 def extract_format():
@@ -63,7 +63,7 @@ def extract_format():
 def parse_transactions(text):
     lines = text.split('\n')
     # return [line for line in lines if any(keyword in line for keyword in ['UPI/', 'POS/', 'IMPS/', 'NEFT/', 'RTGS/'])]
-    return lines[:200]
+    return lines[:150]
 
 # Upload PDF and extract transactions
 @app.route('/upload_pdf', methods=['POST'])
@@ -127,7 +127,7 @@ def get_split_transactions(transaction_texts):
         ],
         "temperature": 0.2,
         "top_p": 1,
-        "max_tokens": 2000
+        "max_tokens": 2500
     }
 
     response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload, timeout=30)
