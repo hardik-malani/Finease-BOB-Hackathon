@@ -9,7 +9,6 @@ const TransactionHistory = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      try {
         const response = await axios.get(`${API_URL}/transactions`);
         console.log(response.data); 
 
@@ -24,10 +23,7 @@ const TransactionHistory = () => {
             : transaction.balance  
         }));
         setTransactions(normalizedTransactions);
-      } catch (error) {
-        setError('Error fetching transactions');
-        console.error('Error fetching transactions:', error);
-      }
+      } 
     };
 
     fetchTransactions();
