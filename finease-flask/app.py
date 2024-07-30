@@ -18,7 +18,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
+GPT4V_KEY = "<key>"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
