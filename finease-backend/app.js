@@ -127,6 +127,86 @@ app.get('/goals', async (req, res) => {
   }
 });
 
+const transactionSchema = new mongoose.Schema({
+  amount: {
+      type: Number,
+      required: true
+  },
+  balance: {
+      type: Number,
+      required: true
+  },
+  date: {
+      type: Date,
+      required: true
+  },
+  transaction: {
+      type: String,
+      required: true
+  }
+});
+
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+async function insertTransactionsIfEmpty() {
+  try {
+      await mongoose.connect('mongodb+srv://finesse:123@cluster0.gdg0t1b.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
+          useNewUrlParser: true,
+          useUnifiedTopology: true
+      });
+      console.log('Connected to MongoDB');
+      const count = await Transaction.countDocuments({});
+      if (count === 0) {
+          console.log('Collection is empty. Inserting transactions.');
+          const transactions = [
+              {
+                  amount: 2510.27,
+                  balance: 2510.27,
+                  date: new Date('2024-06-01'),
+                  transaction: 'OPENING BALANCE'
+              },
+              {
+                  amount: -450.0,
+                  balance: 2060.27,
+                  date: new Date('2024-06-01'),
+                  transaction: 'UPI/AMAN JAIN/451995843686/UPI UPI-415371802085'
+              },
+              {
+                  amount: -50.0,
+                  balance: 2010.27,
+                  date: new Date('2024-06-03'),
+                  transaction: 'UPI/UNIQUE IDENTIFI/415583608466/Upi Transaction UPI-415546442316'
+              },
+              {
+                  amount: -1413.0,
+                  balance: 597.27,
+                  date: new Date('2024-06-03'),
+                  transaction: 'UPI/Dhruv Pandit/452111090837/NA UPI-415555516687'
+              }
+          ];
+          const result = await Transaction.insertMany(transactions);
+          console.log('Transactions saved:', result);
+      } else {
+          console.log('Collection is not empty. No transactions were inserted.');
+      }
+  } catch (err) {
+      console.error('Error:', err);
+  } finally {
+      console.log('done');
+  }
+}
+
+insertTransactionsIfEmpty();
+
+app.get('/transactions', async (req, res) => {
+  try {
+      const transactions = await Transaction.find();
+      res.json(transactions);
+  } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
