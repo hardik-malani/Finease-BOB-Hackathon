@@ -10,9 +10,10 @@ import os
 import re
 import time
 import json
+from pdfminer.high_level import extract_text
 
-# from tabula import read_pdf
-# import pandas as pd
+# import pdfplumber
+
 
 app = Flask(__name__)
 CORS(app)
@@ -54,22 +55,6 @@ def extract_text_from_pdf(pdf_path):
         text += page.extract_text() or ""
     return text
 
-# def extract_text_from_pdf(pdf_path):
-#     # Read the table from the PDF file
-#     dfs = read_pdf(pdf_path, pages="all", multiple_tables=True)
-
-#     # Concatenate all dataframes into one
-#     if not dfs:
-#         return ""  # Return an empty string if no tables are found
-
-#     combined_df = pd.concat(dfs, ignore_index=True)
-
-#     # Convert the dataframe to a string, joining all cells with a space
-#     text = combined_df.apply(lambda x: ' '.join(x.astype(str)), axis=1).str.cat(sep='\n')
-
-#     return text
-
-
 # Extract format of bank statement
 def extract_format():
     global text
@@ -81,12 +66,12 @@ def extract_format():
 def parse_transactions(text):
     lines = text.split('\n')
     # return [line for line in lines if any(keyword in line for keyword in ['UPI/', 'POS/', 'IMPS/', 'NEFT/', 'RTGS/'])]
-    return lines
+    return lines[:200]
 
 # Upload PDF and extract transactions
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
-    global transactions, split_transactions, uploaded_files
+    global transactions, split_transactions, uploaded_files, text
     try:
         if 'files' not in request.files:
             return jsonify({'error': 'No files part in the request'}), 400
@@ -112,15 +97,14 @@ def upload_pdf():
                 transactions.extend(parsed_transactions)
 
             if transactions:
-                first_few_transactions = transactions[:50]
+                first_few_transactions = transactions
                 split_transactions = get_split_transactions(first_few_transactions)
 
-        return jsonify({'transactions': split_transactions}), 200
+        return jsonify({'transactions': split_transactions, 'text': text}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-
 
 def get_split_transactions(transaction_texts):
     headers = {
@@ -138,10 +122,9 @@ def get_split_transactions(transaction_texts):
                 "content": f"""Return me a python list of dictionaries for each of the transaction, 
                 for each transaction the dictionary keys should be Date(STRING), Transaction(STRING), Amount(FLOAT), Balance(FLOAT), \n
                 Make amount as negative float if it is withdrawal (JUST GIVE THE LIST, NO EXTRA TEXT):\n\n, 
+                The transaction key should display the transaction information; what is the transaction about? \n
                 The transaction information is: {transactions_text} \n\n
                 DO NOT FABRICATE INFORMATION ON YOUR OWN. \n
-                The transaction key should display the transaction information; what is the transaction about? \n 
-
                 the format of the text is: {format}"""
             }
         ],
@@ -157,12 +140,11 @@ def get_split_transactions(transaction_texts):
     # text between '[' and ']'
     match = re.search(r'\[(.*?)\]', result, re.DOTALL)
     if match:
-        transactions_text = match.group(0).strip()  # Include the brackets in the result
+        transactions_text = match.group(0).strip()  
         split_transactions = json.loads(transactions_text)
         return split_transactions
     else:
         raise ValueError("Failed to extract the list from response")
-
 
 # List of uploaded files
 @app.route('/get_uploaded_files', methods=['GET'])
@@ -183,7 +165,6 @@ def get_transactions():
             return jsonify({'error': 'Invalid data format'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 def get_income_expenses():
     global split_transactions
@@ -206,7 +187,6 @@ def get_income_expenses():
 
     return {'income': income, 'expenses': expenses}
 
-
 # Finance - expense and income
 @app.route('/get_income_expenses', methods=['GET'])
 def income_expenses():
@@ -216,7 +196,6 @@ def income_expenses():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": "An error occurred while processing transactions"}), 500
-
 
 # Get account balance
 @app.route('/get_account_balance', methods=['GET'])
@@ -238,7 +217,6 @@ def get_account_balance():
             print(f"Warning: Skipping invalid balance value '{balance_str}'")
 
     return {'balances': balances}
-
 
 # Finance Summary
 @app.route('/get_summary', methods=['GET'])
@@ -355,7 +333,6 @@ def categorize_transactions(transactions_text):
         print(f"Failed to categorize transactions. Error: {e}")
         return []
 
-
 # Model 3: Display risk analysis score
 @app.route('/risk_analysis', methods=['GET'])
 def get_risk_analysis_score():
@@ -366,7 +343,9 @@ def get_risk_analysis_score():
     }
 
     transactions_text = "\n".join([f"{t['Date']}, {t['Transaction']}, {t['Amount']}, {t['Balance']}" for t in split_transactions])
-    prompt = f"Analyze the risk of the following transactions and provide an estimate risk score between 1 and 100 based on the companies or people the transactions are with (just an estimate number between 1 to 100). GIVE ONLY A SINGLE INTEGER NUMBER AS OUTPUT:\n{transactions_text}"
+    prompt = f"""Analyze the risk of the following transactions and provide an estimate risk score between 1 and 100 
+    based on the companies or people the transactions are with (just an estimate number between 1 to 100). 
+    GIVE ONLY A SINGLE INTEGER NUMBER AS OUTPUT:\n{transactions_text} \n"""
 
     payload = {
         "messages": [
@@ -392,13 +371,14 @@ def get_risk_analysis_score():
     return jsonify({'risk_score': risk_score})
 
 
-
 # Model 4: Chatbot interaction
 # Initial messages including a placeholder for transactions data
 initial_messages = [
     {
         "role": "system",
-        "content": "You are an AI assistant that helps people find financial information and provide personalized advice based on their bank statements. Do not give irrelevant information, keep your information focused."
+        "content": """You are an AI assistant that helps people find financial information and provide 
+        personalized advice based on their bank statements. Do not give irrelevant information, 
+        keep your information focused. Give information only about transactions, not the Bank"""
     },
     {
         "role": "system",
@@ -535,3 +515,5 @@ def retirement_planning():
 
 if __name__ == '__main__':
     app.run()
+
+

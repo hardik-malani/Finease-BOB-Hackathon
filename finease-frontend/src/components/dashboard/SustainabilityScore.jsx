@@ -91,7 +91,7 @@ const SustainabilityScore = () => {
                 width: '2px',
                 height: '40px',
                 background: 'black',
-                bottom: '-30px',
+                bottom: '-0px',
                 left: '50%',
                 transformOrigin: 'bottom',
                 transform: `translate(-50%, 0) rotate(${getNeedleRotation(riskScore)}deg)`,
