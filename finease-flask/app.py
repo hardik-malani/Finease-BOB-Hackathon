@@ -10,9 +10,6 @@ import os
 import re
 import time
 import json
-from pdfminer.high_level import extract_text
-
-# import pdfplumber
 
 
 app = Flask(__name__)
@@ -130,7 +127,7 @@ def get_split_transactions(transaction_texts):
         ],
         "temperature": 0.2,
         "top_p": 1,
-        "max_tokens": 1000
+        "max_tokens": 2000
     }
 
     response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload, timeout=30)
