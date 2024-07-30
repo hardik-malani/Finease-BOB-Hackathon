@@ -60,11 +60,11 @@ const InvestmentPortfolio = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-gray-600">Total Investment</p>
-              <p className="text-xl font-semibold">${user.totalInvestment.toLocaleString()}</p>
+              <p className="text-xl font-semibold">₹{user.totalInvestment.toLocaleString()}</p>
             </div>
             <div>
               <p className="text-gray-600">Total Return</p>
-              <p className="text-xl font-semibold">${user.totalReturn.toLocaleString()}</p>
+              <p className="text-xl font-semibold">₹{user.totalReturn.toLocaleString()}</p>
             </div>
             <div>
               <p className="text-gray-600">Return Percentage</p>

@@ -26,7 +26,7 @@ transactions = []
 split_transactions = []
 uploaded_files = []
 text=""
-
+categories = ""
 # to clear data
 @app.route('/clear_data', methods=['POST'])
 def clear_data():
@@ -291,6 +291,7 @@ def calculate_and_display_percentages():
     return jsonify({'percentages': response})
 
 def categorize_transactions(transactions_text):
+    global categories
     headers = {
         "Content-Type": "application/json",
         "api-key": GPT4V_KEY,
@@ -323,12 +324,59 @@ def categorize_transactions(transactions_text):
         match = re.search(r'\[(.*?)\]', result, re.DOTALL)
         if match:
             result = match.group(0).strip()  
+            categories = match.group(0).strip() 
             result = json.loads(result)
             
         return result
     except requests.RequestException as e:
         print(f"Failed to categorize transactions. Error: {e}")
         return []
+
+@app.route('/recommended_stocks', methods=['GET'])
+def get_stock_recommendations():
+    global categories
+    categories_text = categories
+    headers = {
+        "Content-Type": "application/json",
+        "api-key": GPT4V_KEY,
+    }
+    prompt = f"""Based on the following spending categories and percentages: {categories_text}, 
+    recommend 5 stocks that align with this user's interests and spending habits. 
+    For each stock, provide the Name, Symbol, INR Price and a brief reason for recommendation 
+    as a Python list of dictionaries. """
+
+    payload = {
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "temperature": 0.5,
+        "top_p": 1,
+        "max_tokens": 1000
+    }
+
+    try:
+        response = requests.post(GPT4V_ENDPOINT, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        result = response.json()['choices'][0]['message']['content'].strip()
+        
+        # Use regex to extract JSON array from the response
+        match = re.search(r'\[.*?\]', result, re.DOTALL)
+        if match:
+            # Parse the JSON data
+            recommendations = json.loads(match.group(0).strip() )
+            return jsonify(recommendations)
+        else:
+            print("Failed to extract JSON from the model's response")
+            return jsonify([])
+    except requests.RequestException as e:
+        print(f"Failed to get stock recommendations. Error: {e}")
+        return jsonify([])
+    except json.JSONDecodeError as e:
+        print(f"Failed to decode JSON from the model's response. Error: {e}")
+        return jsonify([])
 
 # Model 3: Display risk analysis score
 @app.route('/risk_analysis', methods=['GET'])

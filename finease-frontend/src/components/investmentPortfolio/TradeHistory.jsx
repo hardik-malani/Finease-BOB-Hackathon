@@ -20,11 +20,11 @@ const TradeHistory = ({ trades }) => {
             {trades.map((trade, index) => (
               <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
                 <td className="px-4 py-2">{trade.stock}</td>
-                <td className={`px-4 py-2 ${trade.action === 'Buy' ? 'text-green-600' : 'text-red-600'}`}>
+                <td className={`px-4 py-2 ₹{trade.action === 'Buy' ? 'text-green-600' : 'text-red-600'}`}>
                   {trade.action}
                 </td>
                 <td className="px-4 py-2">{trade.quantity}</td>
-                <td className="px-4 py-2">${trade.price.toFixed(2)}</td>
+                <td className="px-4 py-2">₹{trade.price.toFixed(2)}</td>
                 <td className="px-4 py-2">{trade.date}</td>
               </tr>
             ))}

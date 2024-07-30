@@ -1,31 +1,64 @@
+import React, { useState } from 'react';
+import axios from 'axios';
 
-import React from 'react';
+const RecommendedStocks = () => {
+  const [stocks, setStocks] = useState([]);
+  const [loading, setLoading] = useState(false);  // For managing the loading state
+  const [error, setError] = useState(null);  // For managing errors
 
-const RecommendedStocks = ({ stocks }) => {
+  const fetchStocks = () => {
+    setLoading(true);  // Set loading state to true when starting the fetch
+    setError(null);  // Reset error state
+
+    axios.get('https://finease-backend.azurewebsites.net/recommended_stocks')
+      .then(response => {
+        setStocks(response.data);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the recommended stocks!", error);
+        setError("There was an error fetching the recommended stocks.");
+      })
+      .finally(() => {
+        setLoading(false);  // Set loading state to false after the fetch is complete
+      });
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <h2 className="text-xl font-semibold mb-4">Recommended Stocks</h2>
+      <button
+        onClick={fetchStocks}
+        className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4 hover:bg-blue-600"
+      >
+        Update
+      </button>
+      {loading && <p>Loading...</p>}  {/* Display loading text while fetching */}
+      {error && <p className="text-red-600">{error}</p>}  {/* Display error message if any */}
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
             <tr>
               <th className="px-4 py-2">Name</th>
               <th className="px-4 py-2">Symbol</th>
-              <th className="px-4 py-2">Price</th>
-              <th className="px-4 py-2">Change</th>
+              <th className="px-4 py-2">Price (INR)</th>
+              <th className="px-4 py-2">Reason</th>
             </tr>
           </thead>
           <tbody>
-            {stocks.map((stock, index) => (
-              <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                <td className="px-4 py-2">{stock.name}</td>
-                <td className="px-4 py-2">{stock.symbol}</td>
-                <td className="px-4 py-2">${stock.price.toFixed(2)}</td>
-                <td className={`px-4 py-2 ${stock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}%
-                </td>
+            {stocks.length > 0 ? (
+              stocks.map((stock, index) => (
+                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                  <td className="px-4 py-2">{stock.Name}</td>
+                  <td className="px-4 py-2">{stock.Symbol}</td>
+                  <td className="px-4 py-2">{stock['INR Price']}</td>
+                  <td className="px-4 py-2">{stock.Reason}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="px-4 py-2 text-center">No stocks available</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
