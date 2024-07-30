@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = 'https://finease-backend.azurewebsites.net';
+const API_URL = 'http://localhost:5000';
 
 const TransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -10,22 +10,23 @@ const TransactionHistory = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get(`${API_URL}/get_transactions`);
-        // Normalize keys to uppercase
-        const normalizedTransactions = response.data.transactions.map(transaction => ({
-          Date: transaction.Date,
-          Transaction: transaction.Transaction,
-          Amount: typeof transaction.Amount === 'string' 
-            ? parseFloat(transaction.Amount.replace(/₹|,/g, '')) 
-            : transaction.Amount,  // Ensure amount is a number
-          Balance: typeof transaction.Balance === 'string' 
-            ? parseFloat(transaction.Balance.replace(/₹|,/g, '')) 
-            : transaction.Balance   // Ensure balance is a number
+        const response = await axios.get(`${API_URL}/transactions`);
+        console.log(response.data); 
+
+        const normalizedTransactions = response.data.map(transaction => ({
+          Date: new Date(transaction.date).toLocaleDateString(), 
+          Transaction: transaction.transaction,
+          Amount: typeof transaction.amount === 'string' 
+            ? parseFloat(transaction.amount.replace(/₹|,/g, '')) 
+            : transaction.amount, 
+          Balance: typeof transaction.balance === 'string' 
+            ? parseFloat(transaction.balance.replace(/₹|,/g, '')) 
+            : transaction.balance  
         }));
         setTransactions(normalizedTransactions);
       } catch (error) {
         setError('Error fetching transactions');
-        console.error(error);
+        console.error('Error fetching transactions:', error);
       }
     };
 
@@ -41,9 +42,9 @@ const TransactionHistory = () => {
       <h2 className="text-lg font-semibold mb-2">Transaction History</h2>
       {error && <p className="text-red-500">{error}</p>}
       <div className="overflow-x-auto">
-        <table className="w-full text-left">
+        <table className="w-full text-left border-collapse">
           <thead>
-            <tr>
+            <tr className="bg-gray-100">
               <th className="px-4 py-2">Date</th>
               <th className="px-4 py-2">Transaction</th>
               <th className="px-4 py-2">Amount</th>
@@ -56,9 +57,9 @@ const TransactionHistory = () => {
                 <td className="px-4 py-2">{transaction.Date}</td>
                 <td className="px-4 py-2">{transaction.Transaction}</td>
                 <td className={`px-4 py-2 ${getAmountColor(transaction.Amount)}`}>
-                  ₹ {transaction.Amount.toFixed(2)}  {/* Ensure amount is formatted as a number */}
+                  ₹ {transaction.Amount.toFixed(2)}
                 </td>
-                <td className="px-4 py-2">₹ {transaction.Balance.toFixed(2)}</td> {/* Ensure balance is formatted as a number */}
+                <td className="px-4 py-2">₹ {transaction.Balance.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
