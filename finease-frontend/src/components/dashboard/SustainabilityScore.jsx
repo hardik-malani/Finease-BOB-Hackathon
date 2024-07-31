@@ -65,7 +65,7 @@ const SustainabilityScore = () => {
               <span className="relative group cursor-pointer ml-2">
                 {score}
                 {reasoning && (
-                  <span className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 rounded shadow-lg max-w-xs w-64">
+                  <span className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 rounded shadow-lg max-w-xs w-64 z-50">
                     {reasoning}
                   </span>
                 )}

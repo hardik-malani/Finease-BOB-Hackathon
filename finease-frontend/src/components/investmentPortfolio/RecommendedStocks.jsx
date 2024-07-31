@@ -14,7 +14,8 @@ const RecommendedStocks = () => {
 
     try {
       const response = await axios.get(`${API_URL}/recommended_stocks`);
-      setStocks(response.data);
+      setStocks(response.data.recommendations);
+      localStorage.setItem('recommendedStocks', JSON.stringify(response.data.recommendations));
     } catch (error) {
       console.error("There was an error fetching the recommended stocks!", error);
       setError("There was an error fetching the recommended stocks.");
@@ -24,8 +25,11 @@ const RecommendedStocks = () => {
   };
 
   useEffect(() => {
-    fetchStocks();
-  }, []); // Empty dependency array ensures this runs once when the component mounts
+    const savedStocks = localStorage.getItem('recommendedStocks');
+    if (savedStocks) {
+      setStocks(JSON.parse(savedStocks));
+    }
+  }, []);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
@@ -36,8 +40,8 @@ const RecommendedStocks = () => {
       >
         Update
       </button>
-      {loading && <p>Loading...</p>}  {/* Display loading text while fetching */}
-      {error && <p className="text-red-600">{error}</p>}  {/* Display error message if any */}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-600">{error}</p>}
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
@@ -71,3 +75,4 @@ const RecommendedStocks = () => {
 };
 
 export default RecommendedStocks;
+

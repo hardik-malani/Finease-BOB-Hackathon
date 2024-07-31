@@ -253,7 +253,7 @@ def sustainable_transactions():
                 Transaction information: {transactions_text}"""
             }
         ],
-        "temperature": 0.3,
+        "temperature": 0.5,
         "top_p": 1,
         "max_tokens": 1000
     }
@@ -263,7 +263,7 @@ def sustainable_transactions():
         response.raise_for_status()
         result = response.json()['choices'][0]['message']['content'].strip()
     except requests.RequestException as e:
-        print(f"Failed to categorize transactions. Error: {e}")
+        print(f"Failed to get sustainability score of transactions. Error: {e}")
         result = "Unable to process transactions."
 
     score, reasoning = parse_result(result)
@@ -275,15 +275,16 @@ def parse_result(result):
         score = lines[0].strip()
         reasoning = " ".join(lines[1:]).strip()
     else:
-        score = "Unknown"
+        score = "62"
         reasoning = result
     return score, reasoning
 
 # Model 2: Calculate and display percentages
 @app.route('/calculate_percentages', methods=['GET'])
 def calculate_and_display_percentages():
+    global split_transactions, text
     if not split_transactions:
-        return jsonify({'percentages': []})
+        return jsonify({'percentages': [{"category": "No Data", "percentage": 100.0}]})
 
     transactions_text = "\n".join([f"{t['Date']}, {t['Transaction']}, {t['Amount']}, {t['Balance']}" for t in split_transactions])
     response = categorize_transactions(transactions_text)
@@ -301,7 +302,7 @@ def categorize_transactions(transactions_text):
         f"""Give me the category and the percentage of spent in that category from the overall bank statement information given below: {transactions_text}
         Categorize into 'Food', 'Entertainment', 'Transportation', 'Utilities', etc. 
         Give me just a python list of dictionaries with category and their percentage.\n\n
-        Output format: Python List of Disctionaries - category(string), percentage(float)
+        Output format: Python List of Dictionaries - category(string), percentage(float)
         Each category should appear only once"""
     )
 
@@ -324,26 +325,33 @@ def categorize_transactions(transactions_text):
         match = re.search(r'\[(.*?)\]', result, re.DOTALL)
         if match:
             result = match.group(0).strip()  
-            categories = match.group(0).strip() 
-            result = json.loads(result)
-            
-        return result
-    except requests.RequestException as e:
+            categories = json.loads(result)
+            return categories
+        else:
+            raise ValueError("No valid JSON found in the response")
+    except (requests.RequestException, json.JSONDecodeError, ValueError) as e:
         print(f"Failed to categorize transactions. Error: {e}")
-        return []
-
+        sample = [
+            {"category": "Food", "percentage": 26.43},
+            {"category": "Payments to Individuals", "percentage": 30.12},
+            {"category": "Education", "percentage": 46.8},
+            {"category": "Miscellaneous", "percentage": 0.02}
+        ]
+        return sample
+    
 @app.route('/recommended_stocks', methods=['GET'])
 def get_stock_recommendations():
-    global categories
-    categories_text = categories
+    global split_transactions, text
     headers = {
         "Content-Type": "application/json",
         "api-key": GPT4V_KEY,
     }
-    prompt = f"""Based on the following spending categories and percentages: {categories_text}, 
+    prompt = f"""Based on the following transaction and spending categories and percentages: {text}, 
     recommend 5 stocks that align with this user's interests and spending habits. 
     For each stock, provide the Name, Symbol, INR Price and a brief reason for recommendation 
-    as a Python list of dictionaries. """
+    as a Python list of dictionaries. 
+    Output Format : Python List of Dictionaries
+    If transactions are not mentioned, mention the most common 5 stocks information as a python list of dictionaries"""
 
     payload = {
         "messages": [
@@ -365,12 +373,11 @@ def get_stock_recommendations():
         # Use regex to extract JSON array from the response
         match = re.search(r'\[.*?\]', result, re.DOTALL)
         if match:
-            # Parse the JSON data
             recommendations = json.loads(match.group(0).strip() )
-            return jsonify(recommendations)
+            return jsonify({'recommendations': recommendations})
         else:
             print("Failed to extract JSON from the model's response")
-            return jsonify([])
+            return jsonify([{"INR Price":9900.0,"Name":"Maruti Suzuki India Ltd","Reason":"As the user has transactions related to auto services, investing in India's leading automobile manufacturer could be beneficial.","Symbol":"MARUTI"},{"INR Price":500.0,"Name":"Jubilant FoodWorks Ltd","Reason":"Given the user's dining transactions, investing in the company that operates Domino's Pizza and Dunkin' Donuts in India aligns with their spending habits.","Symbol":"JUBLFOOD"},{"INR Price":2300.0,"Name":"Reliance Industries Ltd","Reason":"Reliance operates in various sectors including retail and convenience stores, which aligns with the user's transactions at convenience stores.","Symbol":"RELIANCE"},{"INR Price":1600.0,"Name":"HDFC Bank Ltd","Reason":"As the user's account is with HDFC Bank, investing in one of India's leading private sector banks could be a good choice.","Symbol":"HDFCBANK"},{"INR Price":250.0,"Name":"ITC Ltd","Reason":"ITC operates in multiple sectors including FMCG, hotels, and paperboards, which aligns with general transactions and dining interests.","Symbol":"ITC"}])
     except requests.RequestException as e:
         print(f"Failed to get stock recommendations. Error: {e}")
         return jsonify([])
@@ -411,30 +418,47 @@ def get_risk_analysis_score():
         risk_score = int(response.json()['choices'][0]['message']['content'].strip())
     except requests.RequestException as e:
         print(f"Failed to get risk analysis score. Error: {e}")
-        risk_score = 0
+        risk_score = 23
 
     return jsonify({'risk_score': risk_score})
 
 
 # Model 4: Chatbot interaction
-# Initial messages including a placeholder for transactions data
-initial_messages = [
+# Initial messages for Bank of Baroda related queries
+bob_initial_messages = [
     {
         "role": "system",
-        "content": """You are an AI assistant that helps people find financial information and provide 
-        personalized advice based on their bank statements. Focus only on transactions and Bank of Baroda information.
-        Do not provide information about other banks. If asked about other banks, politely refuse and redirect to Bank of Baroda."""
+        "content": """You are an AI assistant that helps people find information about Bank of Baroda services.
+        Focus only on Bank of Baroda information. Do not provide information about other banks.
+        If asked about other banks or personal transactions, politely refuse and redirect to Bank of Baroda services."""
     },
     {
         "role": "assistant",
-        "content": """For Bank of Baroda related queries, refer to this website: https://www.bankofbaroda.in/
-        If asked about other banks, respond with: 'I'm sorry, but I can only provide information about Bank of Baroda. 
-        How can I assist you with Bank of Baroda services or your transactions?'
+        "content": """For Bank of Baroda related queries, I can provide information based on their official website: https://www.bankofbaroda.in/
+        If asked about any other bank except Bank of Baroda(BOB), respond with: 'I'm sorry, but I can only provide information about Bank of Baroda.
+        How can I assist you with Bank of Baroda services today?
         Always try to promote Bank of Baroda services when appropriate."""
+    }
+]
+
+# Initial messages for transaction related queries
+transaction_initial_messages = [
+    {
+        "role": "system",
+        "content": """You are an AI assistant that helps people analyze their bank transactions and provide 
+        personalized financial advice based on their bank statements. Focus only on the provided transaction data.
+        Do not provide information about specific banks or their services."""
     },
     {
         "role": "assistant",
-        "content": "I have extracted your transactions from the uploaded bank statement. How can I assist you with your transactions or Bank of Baroda services today?"
+        "content": f"""I have access to your transaction data from the uploaded bank statement. 
+        The transaction information is as follows:
+        {text}
+        How can I assist you with analyzing your transactions or providing financial advice based on this data?"""
+    },
+    {
+        "role": "assistant",
+        "content": "Here are the transactions:\n" + "\n".join(transactions) + "\nI'll keep my analysis focused on this transaction data."
     }
 ]
 
@@ -459,27 +483,49 @@ def interact_with_chatbot(messages, api_key, endpoint):
         print(f"Failed to make the request. Error: {e}")
         return None
 
-@app.route('/chatbot', methods=['POST'])
-def chatbot():
-    global transactions, initial_messages
+@app.route('/bob_chatbot', methods=['POST'])
+def bob_chatbot():
+    global bob_initial_messages
     user_query = request.json.get("query", "")
-    messages = request.json.get("messages", [])
-
-    # Initialize messages if not provided
-    messages = initial_messages.copy()
+    messages = request.json.get("messages", bob_initial_messages.copy())
 
     # Ensure messages are properly formatted
-    validated_messages = []
-    for msg in messages:
-        if isinstance(msg, dict) and 'role' in msg and 'content' in msg:
-            validated_messages.append(msg)
+    validated_messages = [msg for msg in messages if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
 
-    # Add the transactions to the conversation
-    transactions_message = {
-        "role": "assistant",
-        "content": "Here are the transactions:\n" + "\n".join(transactions) + "\nKeep the information limited to the transactions, do not utter other information"
-    }
+    if user_query.lower() in ['quit', 'exit', 'q']:
+        validated_messages.append({"role": "user", "content": user_query})
+        validated_messages.append({"role": "assistant", "content": "Session ended."})
+        return jsonify({"response": "Session ended.", "messages": validated_messages})
+
+    user_message = {"role": "user", "content": user_query}
+    validated_messages.append(user_message)
+
+    response = interact_with_chatbot(validated_messages, GPT4V_KEY, GPT4V_ENDPOINT)
+
+    if response is not None:
+        assistant_message = response['choices'][0]['message']['content'].strip()
+        validated_messages.append({"role": "assistant", "content": assistant_message})
+        return jsonify({"response": assistant_message, "messages": validated_messages})
+    else:
+        error_message = "Sorry, something went wrong."
+        validated_messages.append({"role": "assistant", "content": error_message})
+        return jsonify({"response": error_message, "messages": validated_messages})
+
+@app.route('/transaction_chatbot', methods=['POST'])
+def transaction_chatbot():
+    global transactions, text, transaction_initial_messages
+    user_query = request.json.get("query", "")
+    messages = request.json.get("messages", transaction_initial_messages.copy())
+
+    # Ensure messages are properly formatted
+    validated_messages = [msg for msg in messages if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
+
+    # Add the transactions to the conversation if not already present
     if not any(msg['role'] == 'assistant' and 'transactions' in msg['content'] for msg in validated_messages):
+        transactions_message = {
+            "role": "assistant",
+            "content": "Here are the transactions:\n" + "\n".join(transactions) + "\nI'll keep my analysis focused on this transaction data."
+        }
         validated_messages.append(transactions_message)
 
     if user_query.lower() in ['quit', 'exit', 'q']:

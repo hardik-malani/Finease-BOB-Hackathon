@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js';
 
@@ -6,26 +7,26 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
-const BudgetChart = () => {
+const BudgetTracking = () => {
   const [budgetBreakdown, setBudgetBreakdown] = useState([
     { category: 'Loading', percentage: 100 }
   ]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to fetch budget breakdown data from the API
   const fetchBudgetBreakdown = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/calculate_percentages`);
-      if (!response.ok) {
+      const response = await axios.get(`${API_URL}/calculate_percentages`);
+
+      if (response.status !== 200) {
         throw new Error('Failed to fetch data');
       }
-      const data = await response.json();
+
+      const data = response.data;
       setBudgetBreakdown(data.percentages);
-      // Save the fetched data to localStorage
       localStorage.setItem('budgetBreakdown', JSON.stringify(data.percentages));
     } catch (err) {
       setError(err.message);
@@ -34,22 +35,13 @@ const BudgetChart = () => {
     }
   };
 
-  // Use useEffect to load data from localStorage or fetch from API
   useEffect(() => {
-    const loadData = () => {
-      const savedData = localStorage.getItem('budgetBreakdown');
-      if (savedData) {
-        setBudgetBreakdown(JSON.parse(savedData));
-        setLoading(false);
-      } else {
-        fetchBudgetBreakdown();
-      }
-    };
-
-    loadData();
+    const savedData = localStorage.getItem('budgetBreakdown');
+    if (savedData) {
+      setBudgetBreakdown(JSON.parse(savedData));
+    }
   }, []);
 
-  // Data structure for the Doughnut chart
   const data = {
     labels: budgetBreakdown.map(item => item.category),
     datasets: [
@@ -64,7 +56,6 @@ const BudgetChart = () => {
     ],
   };
 
-  // Chart options
   const options = {
     plugins: {
       legend: {
@@ -91,7 +82,6 @@ const BudgetChart = () => {
           <Doughnut data={data} options={options} />
         </div>
       )}
-      {/* Button to trigger the API call */}
       <button 
         onClick={fetchBudgetBreakdown}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
@@ -102,4 +92,4 @@ const BudgetChart = () => {
   );
 };
 
-export default BudgetChart;
+export default BudgetTracking;

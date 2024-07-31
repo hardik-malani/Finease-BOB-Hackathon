@@ -3,7 +3,6 @@ import { FaMicrophone, FaPaperPlane, FaVolumeUp, FaVolumeMute } from 'react-icon
 import axios from 'axios';
 import { marked } from 'marked';
 
-
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const ChatInterface = () => {
@@ -21,6 +20,7 @@ const ChatInterface = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en-US');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentUtterance, setCurrentUtterance] = useState(null);
+  const [queryType, setQueryType] = useState('bob');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -46,7 +46,7 @@ const ChatInterface = () => {
     setMessages([...messages, userMessage]);
 
     try {
-      const response = await axios.post(`${API_URL}/chatbot`, {
+      const response = await axios.post(`${API_URL}/${queryType}_chatbot`, {
         query: input,
         messages,
         language: selectedLanguage,
@@ -233,9 +233,17 @@ const ChatInterface = () => {
       </div>
       <form onSubmit={handleSubmit} className="bg-white p-2 flex items-center space-x-2">
         <select
+          value={queryType}
+          onChange={(e) => setQueryType(e.target.value)}
+          className="mr-2 border p-1 rounded"
+        >
+          <option value="bob">Bank of Baroda Queries</option>
+          <option value="transaction">Transaction Queries</option>
+        </select>
+        <select
           value={selectedLanguage}
           onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="mr-2 border p-1 rounded w-24"
+          className="mr-2 border p-1 rounded"
         >
           <option value="en-US">English</option>
           <option value="guj_Gujr">Gujarati</option>
@@ -251,14 +259,28 @@ const ChatInterface = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 border rounded px-2 py-1"
+          className="flex-1 p-2 border rounded"
+          placeholder="Type a message..."
         />
-        <button type="button" onClick={handleSpeechToText} className="text-blue-500 hover:text-blue-700">
+        <button
+          type="button"
+          onClick={handleSpeechToText}
+          className="p-2 bg-blue-500 text-white rounded"
+        >
           <FaMicrophone />
         </button>
-        <button type="submit" className="text-blue-500 hover:text-blue-700">
+        <button
+          type="submit"
+          className="p-2 bg-blue-500 text-white rounded"
+        >
           <FaPaperPlane />
+        </button>
+        <button
+          type="button"
+          onClick={handleStopSpeech}
+          className="p-2 bg-red-500 text-white rounded"
+        >
+          {isSpeaking ? <FaVolumeMute /> : <FaVolumeUp />}
         </button>
       </form>
     </div>
