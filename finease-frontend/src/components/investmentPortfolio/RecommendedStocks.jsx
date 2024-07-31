@@ -1,27 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
+const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const RecommendedStocks = () => {
   const [stocks, setStocks] = useState([]);
-  const [loading, setLoading] = useState(false);  // For managing the loading state
-  const [error, setError] = useState(null);  // For managing errors
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const fetchStocks = () => {
-    setLoading(true);  // Set loading state to true when starting the fetch
-    setError(null);  // Reset error state
+  const fetchStocks = async () => {
+    setLoading(true);
+    setError(null);
 
-    axios.get('https://finease-backend.azurewebsites.net/recommended_stocks')
-      .then(response => {
-        setStocks(response.data);
-      })
-      .catch(error => {
-        console.error("There was an error fetching the recommended stocks!", error);
-        setError("There was an error fetching the recommended stocks.");
-      })
-      .finally(() => {
-        setLoading(false);  // Set loading state to false after the fetch is complete
-      });
+    try {
+      const response = await axios.get(`${API_URL}/recommended_stocks`);
+      setStocks(response.data);
+    } catch (error) {
+      console.error("There was an error fetching the recommended stocks!", error);
+      setError("There was an error fetching the recommended stocks.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchStocks();
+  }, []); // Empty dependency array ensures this runs once when the component mounts
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">

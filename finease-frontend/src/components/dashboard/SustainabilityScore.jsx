@@ -5,9 +5,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const SustainabilityScore = () => {
-  const [score, setScore] = useState('');
+  const [score, setScore] = useState('Unknown');
   const [reasoning, setReasoning] = useState('');
-  const [riskScore, setRiskScore] = useState(0); 
+  const [riskScore, setRiskScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -20,12 +20,18 @@ const SustainabilityScore = () => {
     setError(null);
 
     try {
-      const response = await axios.get(`${API_URL}/sustainable_transactions`);
-      setScore(response.data.score);
-      setReasoning(response.data.reasoning);
+      const [sustainabilityResponse, riskResponse] = await Promise.all([
+        axios.get(`${API_URL}/sustainable_transactions`),
+        axios.get(`${API_URL}/risk_analysis`),
+      ]);
 
-      const riskResponse = await axios.get(`${API_URL}/risk_analysis`);
-      setRiskScore(riskResponse.data.risk_score);
+      const fetchedScore = sustainabilityResponse.data.score;
+      const fetchedReasoning = sustainabilityResponse.data.reasoning;
+      const fetchedRiskScore = riskResponse.data.risk_score;
+
+      setScore(fetchedScore);
+      setReasoning(fetchedReasoning);
+      setRiskScore(fetchedRiskScore);
     } catch (error) {
       setError('Error fetching data');
       console.error('Error fetching data:', error);
@@ -58,9 +64,11 @@ const SustainabilityScore = () => {
               Score: 
               <span className="relative group cursor-pointer ml-2">
                 {score}
-                <span className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 rounded shadow-lg max-w-xs w-64">
-                  {reasoning}
-                </span>
+                {reasoning && (
+                  <span className="absolute left-0 top-full mt-2 hidden group-hover:block bg-gray-700 text-white text-sm p-2 rounded shadow-lg max-w-xs w-64">
+                    {reasoning}
+                  </span>
+                )}
               </span>
             </p>
           </div>
@@ -91,7 +99,7 @@ const SustainabilityScore = () => {
                 width: '2px',
                 height: '40px',
                 background: 'black',
-                bottom: '-0px',
+                bottom: '0',
                 left: '50%',
                 transformOrigin: 'bottom',
                 transform: `translate(-50%, 0) rotate(${getNeedleRotation(riskScore)}deg)`,

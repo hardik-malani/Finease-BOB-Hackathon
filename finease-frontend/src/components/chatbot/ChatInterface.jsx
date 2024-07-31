@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaMicrophone, FaPaperPlane, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import axios from 'axios';
+import { marked } from 'marked';
+
 
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
@@ -195,6 +197,11 @@ const ChatInterface = () => {
     speechSynthesis.speak(utterance);
   };
 
+  const renderMessageContent = (content) => {
+    const htmlContent = marked(content, { breaks: true });
+    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -209,7 +216,7 @@ const ChatInterface = () => {
                   message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'
                 }`}
               >
-                {message.content}
+                {renderMessageContent(message.content)}
                 {message.sender === 'assistant' && (
                   <button
                     type="button"
@@ -244,21 +251,14 @@ const ChatInterface = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1 border p-2 rounded"
-          placeholder="Type your message here..."
+          placeholder="Type your message..."
+          className="flex-1 border rounded px-2 py-1"
         />
-        <button
-          type="button"
-          onClick={handleSpeechToText}
-          className="text-gray-500 hover:text-gray-700"
-        >
+        <button type="button" onClick={handleSpeechToText} className="text-blue-500 hover:text-blue-700">
           <FaMicrophone />
         </button>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        <button type="submit" className="text-blue-500 hover:text-blue-700">
           <FaPaperPlane />
-        </button>
-        <button type="button" onClick={handleStopSpeech} className="text-red-500 hover:text-red-700">
-          Stop
         </button>
       </form>
     </div>

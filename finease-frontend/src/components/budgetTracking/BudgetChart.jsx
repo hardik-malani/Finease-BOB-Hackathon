@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js';
 
@@ -7,8 +7,10 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const BudgetChart = () => {
-  const [budgetBreakdown, setBudgetBreakdown] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [budgetBreakdown, setBudgetBreakdown] = useState([
+    { category: 'Loading', percentage: 100 }
+  ]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Function to fetch budget breakdown data from the API
@@ -23,12 +25,29 @@ const BudgetChart = () => {
       }
       const data = await response.json();
       setBudgetBreakdown(data.percentages);
+      // Save the fetched data to localStorage
+      localStorage.setItem('budgetBreakdown', JSON.stringify(data.percentages));
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  // Use useEffect to load data from localStorage or fetch from API
+  useEffect(() => {
+    const loadData = () => {
+      const savedData = localStorage.getItem('budgetBreakdown');
+      if (savedData) {
+        setBudgetBreakdown(JSON.parse(savedData));
+        setLoading(false);
+      } else {
+        fetchBudgetBreakdown();
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Data structure for the Doughnut chart
   const data = {
