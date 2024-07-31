@@ -14,8 +14,10 @@ const RecommendedStocks = () => {
 
     try {
       const response = await axios.get(`${API_URL}/recommended_stocks`);
-      setStocks(response.data.recommendations);
-      localStorage.setItem('recommendedStocks', JSON.stringify(response.data.recommendations));
+      // Adjust according to your API's response structure
+      const fetchedStocks = response.data.recommendations || [];
+      setStocks(fetchedStocks);
+      localStorage.setItem('recommendedStocks', JSON.stringify(fetchedStocks));
     } catch (error) {
       console.error("There was an error fetching the recommended stocks!", error);
       setError("There was an error fetching the recommended stocks.");
@@ -27,7 +29,18 @@ const RecommendedStocks = () => {
   useEffect(() => {
     const savedStocks = localStorage.getItem('recommendedStocks');
     if (savedStocks) {
-      setStocks(JSON.parse(savedStocks));
+      try {
+        const parsedStocks = JSON.parse(savedStocks);
+        if (Array.isArray(parsedStocks)) {
+          setStocks(parsedStocks);
+        } else {
+          console.error('Invalid data format in localStorage.');
+          setStocks([]);
+        }
+      } catch (error) {
+        console.error('Error parsing saved stocks:', error);
+        setStocks([]);
+      }
     }
   }, []);
 
@@ -40,8 +53,8 @@ const RecommendedStocks = () => {
       >
         Update
       </button>
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {loading && <p>Loading...</p>}  
+      {error && <p className="text-red-600">{error}</p>}  
       <div className="overflow-x-auto">
         <table className="min-w-full">
           <thead>
@@ -75,4 +88,3 @@ const RecommendedStocks = () => {
 };
 
 export default RecommendedStocks;
-

@@ -5,14 +5,22 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const SustainabilityScore = () => {
-  const [score, setScore] = useState('Unknown');
+  const [score, setScore] = useState(null);
   const [reasoning, setReasoning] = useState('');
   const [riskScore, setRiskScore] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    const storedData = localStorage.getItem('sustainabilityData');
+    if (storedData) {
+      const { score, reasoning, riskScore } = JSON.parse(storedData);
+      setScore(score);
+      setReasoning(reasoning);
+      setRiskScore(riskScore);
+      setIsDataLoaded(true);
+    }
   }, []);
 
   const fetchData = async () => {
@@ -32,6 +40,16 @@ const SustainabilityScore = () => {
       setScore(fetchedScore);
       setReasoning(fetchedReasoning);
       setRiskScore(fetchedRiskScore);
+      setIsDataLoaded(true);
+
+      localStorage.setItem(
+        'sustainabilityData',
+        JSON.stringify({
+          score: fetchedScore,
+          reasoning: fetchedReasoning,
+          riskScore: fetchedRiskScore,
+        })
+      );
     } catch (error) {
       setError('Error fetching data');
       console.error('Error fetching data:', error);
@@ -55,9 +73,10 @@ const SustainabilityScore = () => {
   return (
     <div className="bg-white p-4 rounded shadow" style={{ width: '300px' }}>
       <h2 className="text-lg font-semibold mb-2">Sustainability Score</h2>
+      {!isDataLoaded && <p>No data available. Click 'Update' to fetch data.</p>}
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
-      {!loading && !error && (
+      {isDataLoaded && !loading && !error && (
         <>
           <div className="mb-4">
             <p className="text-xl font-semibold">

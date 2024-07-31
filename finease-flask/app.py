@@ -18,7 +18,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "<key>"
+GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
@@ -463,6 +463,7 @@ transaction_initial_messages = [
 ]
 
 def interact_with_chatbot(messages, api_key, endpoint):
+    global bob_initial_messages, transaction_initial_messages
     headers = {
         "Content-Type": "application/json",
         "api-key": api_key,
@@ -472,7 +473,7 @@ def interact_with_chatbot(messages, api_key, endpoint):
         "messages": messages,
         "temperature": 0.2,
         "top_p": 0.95,
-        "max_tokens": 500
+        "max_tokens": 200
     }
 
     try:
@@ -487,7 +488,7 @@ def interact_with_chatbot(messages, api_key, endpoint):
 def bob_chatbot():
     global bob_initial_messages
     user_query = request.json.get("query", "")
-    messages = request.json.get("messages", bob_initial_messages.copy())
+    messages = bob_initial_messages.copy()
 
     # Ensure messages are properly formatted
     validated_messages = [msg for msg in messages if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
@@ -515,7 +516,7 @@ def bob_chatbot():
 def transaction_chatbot():
     global transactions, text, transaction_initial_messages
     user_query = request.json.get("query", "")
-    messages = request.json.get("messages", transaction_initial_messages.copy())
+    messages = transaction_initial_messages.copy()
 
     # Ensure messages are properly formatted
     validated_messages = [msg for msg in messages if isinstance(msg, dict) and 'role' in msg and 'content' in msg]
