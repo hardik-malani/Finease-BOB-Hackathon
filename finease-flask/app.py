@@ -18,7 +18,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-GPT4V_KEY = "32a17b4382f644b48aac5d0ede6f0ac0"
+GPT4V_KEY = "<key>"
 GPT4V_ENDPOINT = "https://finease.openai.azure.com/openai/deployments/finease-2/chat/completions?api-version=2024-02-15-preview"
 
 # Global variables
@@ -396,7 +396,8 @@ def get_risk_analysis_score():
 
     transactions_text = "\n".join([f"{t['Date']}, {t['Transaction']}, {t['Amount']}, {t['Balance']}" for t in split_transactions])
     prompt = f"""Analyze the risk of the following transactions and provide an estimate risk score between 1 and 100 
-    based on the companies or people the transactions are with (just an estimate number between 1 to 100). 
+    based on the companies or people the transactions are with (just an estimate number between 1 to 100).
+    It should also take into account the savings and the income and the expense they have generated over the time period. 
     GIVE ONLY A SINGLE INTEGER NUMBER AS OUTPUT:\n{transactions_text} \n"""
 
     payload = {
