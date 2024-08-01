@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const API_URL = 'https://finease-backend.azurewebsites.net/retirement_planning';
@@ -17,6 +17,12 @@ const RetirementInfoForm = ({ initialInfo = {} }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    if (['Single', 'Divorced', 'Widowed'].includes(info.maritalStatus)) {
+      setInfo((prevInfo) => ({ ...prevInfo, spouseAge: '' }));
+    }
+  }, [info.maritalStatus]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInfo({
@@ -30,13 +36,24 @@ const RetirementInfoForm = ({ initialInfo = {} }) => {
     setLoading(true);
     setError(null);
 
+    if (parseInt(info.currentAge, 10) > parseInt(info.retirementAge, 10)) {
+      alert('Current age cannot be greater than retirement age');
+      setLoading(false);
+      return;
+    }
+
+    const dataToSend = { ...info };
+    if (['Single', 'Divorced', 'Widowed'].includes(info.maritalStatus)) {
+      delete dataToSend.spouseAge;
+    }
+
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(info),
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
@@ -89,18 +106,20 @@ const RetirementInfoForm = ({ initialInfo = {} }) => {
             <option value="Widowed">Widowed</option>
           </select>
         </div>
+        {info.maritalStatus === 'Married' && (
+          <div>
+            <label className="block mb-2">Spouse Age</label>
+            <input
+              type="number"
+              name="spouseAge"
+              value={info.spouseAge}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+        )}
         <div>
-          <label className="block mb-2">Spouse Age</label>
-          <input
-            type="number"
-            name="spouseAge"
-            value={info.spouseAge}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Work Income</label>
+          <label className="block mb-2">Work Income (Monthly)</label>
           <input
             type="number"
             name="workIncome"

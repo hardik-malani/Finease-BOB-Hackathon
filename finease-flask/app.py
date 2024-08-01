@@ -572,7 +572,7 @@ def retirement_planning():
     Retirement Age: {data.get('retirementAge', 'N/A')}
     Marital Status: {data.get('maritalStatus', 'N/A')}
     Spouse Age: {data.get('spouseAge', 'N/A')}
-    Work Income: {data.get('workIncome', 'N/A')}
+    Work Income (Monthly): {data.get('workIncome', 'N/A')}
     Current Saving: {data.get('currentSaving', 'N/A')}
     Recent balances: {balances}
 
