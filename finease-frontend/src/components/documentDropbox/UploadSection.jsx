@@ -5,7 +5,8 @@ const API_URL = 'https://finease-backend.azurewebsites.net';
 
 const UploadSection = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   const fileInputRef = useRef(null);
 
   const handleDragOver = (event) => {
@@ -39,7 +40,8 @@ const UploadSection = () => {
 
   const handleFileUpload = async (files) => {
     setIsLoading(true);
-    setSuccessMessage('');
+    setMessage('');
+    setMessageType('');
 
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
@@ -49,12 +51,26 @@ const UploadSection = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: 30000, // 30 seconds timeout
       });
       console.log('Files uploaded:', response.data.uploaded_files);
-      setSuccessMessage('Files uploaded successfully!');
+      setMessage('Files uploaded successfully!');
+      setMessageType('success');
+      
+      // Store the extracted text in local storage
+      const { text } = response.data;
+      localStorage.setItem('extractedText', text);
+
     } catch (error) {
       console.error('Error uploading files:', error);
-      setSuccessMessage('Error uploading files.');
+      if (error.response) {
+        setMessage(`Error: ${error.response.data.error || 'Unknown server error'}`);
+      } else if (error.request) {
+        setMessage('Error: No response from server. Please try again.');
+      } else {
+        setMessage(`Error: ${error.message}`);
+      }
+      setMessageType('error');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +93,11 @@ const UploadSection = () => {
         >
           {isLoading ? 'Uploading...' : 'Upload PDF'}
         </button>
-        {successMessage && <p className="text-green-600 mt-2">{successMessage}</p>}
+        {message && (
+          <p className={`mt-2 ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+            {message}
+          </p>
+        )}
         <input
           type="file"
           className="hidden"

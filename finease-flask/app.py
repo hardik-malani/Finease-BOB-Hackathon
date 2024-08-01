@@ -516,7 +516,17 @@ def bob_chatbot():
 @app.route('/transaction_chatbot', methods=['POST'])
 def transaction_chatbot():
     global transactions, text, transaction_initial_messages
+    
     user_query = request.json.get("query", "")
+    extractedText = request.json.get("extractedText", {})
+    split_transaction = extractedText.get("split_transaction", "")
+    current_text = split_transaction if split_transaction else text
+    
+    transaction_initial_messages[1]['content'] = f"""I have access to your transaction data from the uploaded bank statement. 
+    The transaction information is as follows:
+    {current_text}
+    How can I assist you with analyzing your transactions or providing financial advice based on this data?"""
+
     messages = transaction_initial_messages.copy()
 
     # Ensure messages are properly formatted
@@ -548,7 +558,6 @@ def transaction_chatbot():
         error_message = "Sorry, something went wrong."
         validated_messages.append({"role": "assistant", "content": error_message})
         return jsonify({"response": error_message, "messages": validated_messages})
-
 
 @app.route('/retirement_planning', methods=['POST'])
 def retirement_planning():

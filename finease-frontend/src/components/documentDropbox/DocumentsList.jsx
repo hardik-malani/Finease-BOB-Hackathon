@@ -37,6 +37,7 @@ const DocumentsList = () => {
     try {
       await axios.post(`${API_URL}/clear_data`);
       setDocuments([]);
+      localStorage.removeItem('extractedText');  // Clear local storage
     } catch (error) {
       console.error('Error clearing data:', error);
     }
